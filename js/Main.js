@@ -61,6 +61,7 @@ const electronLifespanValue = document.getElementById('electronLifespanValue');
 
 // Config Selects
 const chartTimeWindowSelect = document.getElementById('chartTimeWindowSelect');
+const gpuOptimizationSelect = document.getElementById('gpuOptimizationSelect');
 
 // Managers
 const chartManager = new ChartManager('discoveryChart');
@@ -197,6 +198,10 @@ function synchronizeConfig() {
     SETTINGS.instabilityThreshold = parseFloat(instabilityThresholdSlider.value) / 10;
     SETTINGS.electronLifespanMultiplier = parseFloat(electronLifespanSlider.value) / 10;
     SETTINGS.chartTimeWindow = parseInt(chartTimeWindowSelect.value, 10);
+    SETTINGS.gpuOptimization = gpuOptimizationSelect.value === 'enabled';
+    
+    // Toggle body class for GPU optimization (backdrop-filter disable)
+    document.body.classList.toggle('gpu-optimized', SETTINGS.gpuOptimization);
     
     // Sync visibility of containers directly from settings
     chartContainer.classList.toggle('hidden', !SETTINGS.showChart);
@@ -305,41 +310,49 @@ function start() {
 // Quick Control Dock Event Listeners
 btnPlayPause.addEventListener('click', () => {
     SETTINGS.isPaused = !SETTINGS.isPaused;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
 btnModeDecay.addEventListener('click', () => {
     SETTINGS.addParticleOnClick = false;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
 btnModeSpawn.addEventListener('click', () => {
     SETTINGS.addParticleOnClick = true;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
 btnSpontaneousGen.addEventListener('click', () => {
     SETTINGS.spontaneousGeneration = !SETTINGS.spontaneousGeneration;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
 btnSpontaneousDecay.addEventListener('click', () => {
     SETTINGS.spontaneousDecay = !SETTINGS.spontaneousDecay;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
 btnScreenWrap.addEventListener('click', () => {
     SETTINGS.noBoundingBox = !SETTINGS.noBoundingBox;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
 btnToggleChart.addEventListener('click', () => {
     SETTINGS.showChart = !SETTINGS.showChart;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
 btnToggleDiscoveries.addEventListener('click', () => {
     SETTINGS.showDiscoveries = !SETTINGS.showDiscoveries;
+    if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
 
@@ -364,6 +377,12 @@ chartTimeWindowSelect.addEventListener('change', () => {
     chartManager.reset();
 });
 
+gpuOptimizationSelect.addEventListener('change', () => {
+    SETTINGS.gpuOptimization = gpuOptimizationSelect.value === 'enabled';
+    document.body.classList.toggle('gpu-optimized', SETTINGS.gpuOptimization);
+    if (simulation) simulation.needsRedraw = true;
+});
+
 // Real-time slider updates
 const allSliders = [
     numMoleculesSlider, simulationAreaSlider, miniParticleScaleSlider,
@@ -385,11 +404,13 @@ allSliders.forEach(slider => {
         SETTINGS.elasticity = parseFloat(elasticitySlider.value) / 10;
         SETTINGS.instabilityThreshold = parseFloat(instabilityThresholdSlider.value) / 10;
         SETTINGS.electronLifespanMultiplier = parseFloat(electronLifespanSlider.value) / 10;
+        if (simulation) simulation.needsRedraw = true;
     });
 });
 
 colorCountSelect.addEventListener('change', () => {
     SETTINGS.colorCount = parseInt(colorCountSelect.value);
+    if (simulation) simulation.needsRedraw = true;
 });
 
 btnAddTen.addEventListener('click', () => {
@@ -409,6 +430,7 @@ canvas.addEventListener('click', (event) => {
 // Handle resize events
 window.addEventListener('resize', () => {
     updateBounds();
+    if (simulation) simulation.needsRedraw = true;
 });
 
 // Start loop

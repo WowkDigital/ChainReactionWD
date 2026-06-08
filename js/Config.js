@@ -80,6 +80,7 @@ export const SETTINGS = {
     spontaneousDecay: false,
     addParticleOnClick: false,
     noBoundingBox: false,
+    gpuOptimization: true, // GPU power saving (disables backdrop-filter blur)
     
     // Chart Time Window
     chartTimeWindow: 30000, // ms

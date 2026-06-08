@@ -27,6 +27,7 @@ export default class Simulation {
         this.uniqueCombinationsSet = new Set();
         this.simulationStartTime = 0;
         this.animationFrameId = null;
+        this.needsRedraw = true;
     }
 
     /**
@@ -40,6 +41,7 @@ export default class Simulation {
         this.lastTickTime = performance.now();
         this.elapsedTimeAccumulated = 0;
         this.lastStatsUpdateTime = 0;
+        this.needsRedraw = true;
         
         // Reset config context
         SETTINGS.autoTimeScale = 1.0;
@@ -66,6 +68,7 @@ export default class Simulation {
             newMolecule.invulnerabilityTimer = CONSTANTS.INVULNERABILITY_DURATION;
             this.molecules.push(newMolecule);
         }
+        this.needsRedraw = true;
     }
 
     /**
@@ -79,6 +82,7 @@ export default class Simulation {
             const newMolecule = new Molecule(mouseX, mouseY, size);
             newMolecule.invulnerabilityTimer = CONSTANTS.INVULNERABILITY_DURATION;
             this.molecules.push(newMolecule);
+            this.needsRedraw = true;
         } else {
             // Find clicked molecule (searching backward to check top-most rendered first)
             for (let i = this.molecules.length - 1; i >= 0; i--) {
@@ -93,6 +97,7 @@ export default class Simulation {
                     const decayFrames = Math.max(30, getRandomNormal(CONSTANTS.DECAY_TIME_MEAN_FRAMES, CONSTANTS.DECAY_TIME_STD_DEV_FRAMES));
                     m.collisionDecayTimer = decayFrames;
                     m.initialCollisionDecayTime = decayFrames;
+                    this.needsRedraw = true;
                     break; // Action handled
                 }
             }
@@ -355,6 +360,11 @@ export default class Simulation {
             // Compute slow-motion scale from active electrons
             const targetAutoTimeScale = calculateAutoTimeScale(this.electrons.length);
             SETTINGS.autoTimeScale += (targetAutoTimeScale - SETTINGS.autoTimeScale) * SETTINGS.lerpFactor;
+        } else {
+            // If paused, only proceed with redrawing if requested
+            if (!this.needsRedraw) {
+                return;
+            }
         }
         
         SETTINGS.effectiveTimeScale = SETTINGS.isPaused ? 0 : (SETTINGS.autoTimeScale * SETTINGS.simulationSpeed);
@@ -398,9 +408,9 @@ export default class Simulation {
             this.electrons = this.electrons.filter(e => !e.markedForRemoval);
         }
 
-        // Report real-time stats to UI layer (throttled to 100ms to avoid layout thrashing)
+        // Report real-time stats to UI layer (throttled to 100ms when running, bypass throttle when paused)
         if (this.callbacks.onStatsUpdate) {
-            if (now - this.lastStatsUpdateTime > 100) {
+            if (SETTINGS.isPaused || (now - this.lastStatsUpdateTime > 100)) {
                 this.lastStatsUpdateTime = now;
                 const elapsed = Math.floor(this.elapsedTimeAccumulated / 1000);
                 this.callbacks.onStatsUpdate({
@@ -411,6 +421,10 @@ export default class Simulation {
                     slowdownPercent: Math.round((1 - SETTINGS.autoTimeScale) * 100)
                 });
             }
+        }
+
+        if (SETTINGS.isPaused) {
+            this.needsRedraw = false;
         }
     }
 }

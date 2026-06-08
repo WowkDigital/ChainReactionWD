@@ -332,7 +332,8 @@ canvas#simulationCanvas {
     border-left: 1px solid var(--border-color);
     z-index: 30;
     transform: translate3d(100%, 0, 0);
-    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    visibility: hidden;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.4s;
     display: flex;
     flex-direction: column;
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
@@ -340,6 +341,7 @@ canvas#simulationCanvas {
 }
 #config-sidebar.open { 
     transform: translate3d(0, 0, 0); 
+    visibility: visible;
 }
 
 #config-header {
@@ -640,4 +642,34 @@ canvas#simulationCanvas {
     color: var(--text-secondary);
     margin-top: 0.35rem;
     font-weight: 600;
+}
+
+/* --- GPU Optimization overrides --- */
+body.gpu-optimized #top-dashboard,
+body.gpu-optimized .glass-panel,
+body.gpu-optimized #config-sidebar,
+body.gpu-optimized .toggle-button,
+body.gpu-optimized #unique-combinations-bar {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.gpu-optimized #top-dashboard {
+    background: rgba(13, 17, 23, 0.96);
+}
+
+body.gpu-optimized .glass-panel {
+    background-color: rgba(18, 22, 29, 0.96);
+}
+
+body.gpu-optimized #config-sidebar {
+    background-color: rgba(13, 17, 23, 0.98);
+}
+
+body.gpu-optimized .toggle-button {
+    background: rgba(18, 22, 29, 0.96);
+}
+
+body.gpu-optimized #unique-combinations-bar {
+    background-color: rgba(8, 11, 16, 0.96);
 }
