@@ -1,6 +1,43 @@
 import { CONSTANTS, SETTINGS } from '../Config.js';
 import Entity from './Entity.js';
 
+let electronSpriteCanvas = null;
+
+/**
+ * Creates and caches a high-quality offscreen canvas sprite of the glowing electron
+ * @returns {HTMLCanvasElement}
+ */
+function getElectronSprite() {
+    if (electronSpriteCanvas) return electronSpriteCanvas;
+
+    const size = 32; // Accommodate electron radius (3) + shadow blur (10) + safety margins
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const center = size / 2;
+
+    // Draw glow shadow first
+    ctx.save();
+    ctx.shadowColor = '#FBBF24';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(center, center, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#FBBF24';
+    ctx.fill();
+    ctx.restore();
+
+    // Draw sharp golden outer border (without shadow blur)
+    ctx.beginPath();
+    ctx.arc(center, center, 3, 0, Math.PI * 2);
+    ctx.strokeStyle = '#FBBF24';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    electronSpriteCanvas = canvas;
+    return electronSpriteCanvas;
+}
+
 export default class Electron extends Entity {
     /**
      * @param {number} x 
@@ -40,27 +77,20 @@ export default class Electron extends Entity {
     }
 
     /**
-     * Draws a glowing yellow electron to the canvas
+     * Draws a glowing yellow electron to the canvas (optimized with offscreen sprite blitting)
      * @param {CanvasRenderingContext2D} ctx 
      */
     draw(ctx) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-
-        ctx.strokeStyle = CONSTANTS.WHITE_COLOR; // Golden outer stroke
-        ctx.strokeStyle = '#FBBF24';
-        ctx.lineWidth = 1.5; 
-        ctx.stroke();
-
+        const sprite = getElectronSprite();
+        
         const fadeInProgress = 1 - Math.max(0, this.fadeInTimer / this.initialFadeInTime);
         const fadeOutProgress = Math.max(0, this.lifespan / CONSTANTS.FADE_OUT_DURATION);
         const totalAlpha = Math.min(fadeInProgress, fadeOutProgress);
 
-        ctx.fillStyle = `rgba(251, 191, 36, ${totalAlpha})`;
-        ctx.shadowColor = '#FBBF24';
-        ctx.shadowBlur = 10 * totalAlpha; 
-        ctx.fill();
+        ctx.save();
+        ctx.globalAlpha = totalAlpha;
+        // The sprite center is at offset 16 (half of width/height 32)
+        ctx.drawImage(sprite, this.x - 16, this.y - 16);
         ctx.restore();
     }
 }

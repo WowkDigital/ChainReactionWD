@@ -39,6 +39,7 @@ export default class Simulation {
         
         this.lastTickTime = performance.now();
         this.elapsedTimeAccumulated = 0;
+        this.lastStatsUpdateTime = 0;
         
         // Reset config context
         SETTINGS.autoTimeScale = 1.0;
@@ -342,16 +343,19 @@ export default class Simulation {
             this.electrons = this.electrons.filter(e => !e.markedForRemoval);
         }
 
-        // Report real-time stats to UI layer
+        // Report real-time stats to UI layer (throttled to 100ms to avoid layout thrashing)
         if (this.callbacks.onStatsUpdate) {
-            const elapsed = Math.floor(this.elapsedTimeAccumulated / 1000);
-            this.callbacks.onStatsUpdate({
-                elapsedSeconds: elapsed,
-                molecules: this.molecules.length,
-                electrons: this.electrons.length,
-                combinations: this.uniqueCombinationsSet.size,
-                slowdownPercent: Math.round((1 - SETTINGS.autoTimeScale) * 100)
-            });
+            if (now - this.lastStatsUpdateTime > 100) {
+                this.lastStatsUpdateTime = now;
+                const elapsed = Math.floor(this.elapsedTimeAccumulated / 1000);
+                this.callbacks.onStatsUpdate({
+                    elapsedSeconds: elapsed,
+                    molecules: this.molecules.length,
+                    electrons: this.electrons.length,
+                    combinations: this.uniqueCombinationsSet.size,
+                    slowdownPercent: Math.round((1 - SETTINGS.autoTimeScale) * 100)
+                });
+            }
         }
     }
 }

@@ -146,19 +146,29 @@ export default class Molecule extends Entity {
         ctx.translate(this.x + shakeX, this.y + shakeY);
         ctx.rotate(this.rotation);
 
-        // Draw quantum field glowing background
+        // Draw quantum field glowing background (simulated glow via nested transparent circles to bypass slow shadowBlur)
         if (currentShakeIntensity > 0) {
-            ctx.beginPath();
             const glowRadius = this.radius * 0.8 + currentShakeIntensity * 0.5; 
-            ctx.arc(0, 0, glowRadius, 0, Math.PI * 2);
             const glowAlpha = Math.min(0.5, currentShakeIntensity / CONSTANTS.MAX_SHAKE_AMOUNT * 0.5);
-            ctx.fillStyle = `rgba(255, 255, 255, ${glowAlpha})`;
-            ctx.shadowColor = '#FFFFFF';
-            ctx.shadowBlur = currentShakeIntensity * 1.5; 
+            
+            // Outer glow ring
+            ctx.fillStyle = `rgba(255, 255, 255, ${glowAlpha * 0.25})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, glowRadius * 1.6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Mid glow ring
+            ctx.fillStyle = `rgba(255, 255, 255, ${glowAlpha * 0.5})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, glowRadius * 1.25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Inner glow ring
+            ctx.fillStyle = `rgba(255, 255, 255, ${glowAlpha * 0.8})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, glowRadius * 0.9, 0, Math.PI * 2);
             ctx.fill();
         }
-        ctx.shadowBlur = 0;
-        ctx.shadowColor = 'transparent';
 
         // Draw orbiting sub-atoms
         this.balls.forEach(ball => {
