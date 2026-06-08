@@ -46,12 +46,20 @@ export default class Simulation {
         SETTINGS.effectiveTimeScale = 1.0;
 
         // Spawn starting molecules at random positions inside valid boundaries
+        this.spawnMolecules(SETTINGS.numMolecules);
+    }
+
+    /**
+     * Spawns molecules dynamically inside current physics boundaries
+     * @param {number} count 
+     */
+    spawnMolecules(count) {
         const top = SETTINGS.topBoundary || 0;
         const bottom = SETTINGS.bottomBoundary || this.canvas.height;
         
-        for (let i = 0; i < SETTINGS.numMolecules; i++) {
+        for (let i = 0; i < count; i++) {
             const size = getWeightedRandomSize();
-            const x = Math.random() * this.canvas.width;
+            const x = Math.random() * SETTINGS.width;
             const y = Math.random() * (bottom - top) + top;
             
             const newMolecule = new Molecule(x, y, size);
@@ -332,9 +340,15 @@ export default class Simulation {
             this.electrons.forEach(e => e.update());
         }
 
-        // Draw entities (always draw)
+        // Draw entities (always draw with zoom scale mapping if simulation area is expanded)
+        this.ctx.save();
+        const scale = 1 / (SETTINGS.simulationAreaScale || 1.0);
+        this.ctx.scale(scale, scale);
+        
         this.molecules.forEach(m => m.draw(this.ctx));
         this.electrons.forEach(e => e.draw(this.ctx));
+        
+        this.ctx.restore();
 
         // Physics steps (only if not paused)
         if (!SETTINGS.isPaused) {

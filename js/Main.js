@@ -23,6 +23,7 @@ const btnToggleChart = document.getElementById('btn-toggle-chart');
 const btnToggleDiscoveries = document.getElementById('btn-toggle-discoveries');
 const btnReset = document.getElementById('btn-reset');
 const btnSettingsToggle = document.getElementById('btn-settings-toggle');
+const btnAddTen = document.getElementById('btn-add-ten');
 
 // Stats Displays
 const simTimeDisplay = document.getElementById('simTimeDisplay');
@@ -34,8 +35,9 @@ const timeScaleDisplay = document.getElementById('timeScaleDisplay');
 // Config Sliders & Values
 const numMoleculesSlider = document.getElementById('numMoleculesSlider');
 const numMoleculesValue = document.getElementById('numMoleculesValue');
-const colorCountSlider = document.getElementById('colorCountSlider');
-const colorCountValue = document.getElementById('colorCountValue');
+const colorCountSelect = document.getElementById('colorCountSelect');
+const simulationAreaSlider = document.getElementById('simulationAreaSlider');
+const simulationAreaValue = document.getElementById('simulationAreaValue');
 const miniParticleScaleSlider = document.getElementById('miniParticleScaleSlider');
 const miniParticleScaleValue = document.getElementById('miniParticleScaleValue');
 const lerpFactorSlider = document.getElementById('lerpFactorSlider');
@@ -71,14 +73,15 @@ function updateBounds() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
-    SETTINGS.width = canvas.width;
-    SETTINGS.height = canvas.height;
+    const areaScale = SETTINGS.simulationAreaScale || 1.0;
+    SETTINGS.width = canvas.width * areaScale;
+    SETTINGS.height = canvas.height * areaScale;
 
-    // Boundary top accounts for the unified floating top panel height
-    SETTINGS.topBoundary = topDashboard.offsetHeight + 20;
+    // Boundary top accounts for the unified floating top panel height scaled
+    SETTINGS.topBoundary = (topDashboard.offsetHeight + 20) * areaScale;
     
     const discoveriesVisible = !uniqueCombinationsBar.classList.contains('hidden');
-    SETTINGS.bottomBoundary = discoveriesVisible ? (uniqueCombinationsBar.offsetTop - 10) : (canvas.height - 10);
+    SETTINGS.bottomBoundary = discoveriesVisible ? ((uniqueCombinationsBar.offsetTop - 10) * areaScale) : (SETTINGS.height - 10);
 }
 
 /**
@@ -182,7 +185,8 @@ function handleStatsUpdate(stats) {
  */
 function synchronizeConfig() {
     SETTINGS.numMolecules = parseInt(numMoleculesSlider.value);
-    SETTINGS.colorCount = parseInt(colorCountSlider.value);
+    SETTINGS.colorCount = parseInt(colorCountSelect.value);
+    SETTINGS.simulationAreaScale = parseFloat(simulationAreaSlider.value) / 10;
     SETTINGS.miniParticleScale = parseFloat(miniParticleScaleSlider.value) / 10;
     SETTINGS.lerpFactor = parseFloat(lerpFactorSlider.value) / 1000;
     SETTINGS.simulationSpeed = parseFloat(simSpeedSlider.value) / 10;
@@ -264,7 +268,7 @@ function syncDockButtonsFromSettings() {
  */
 function updateSliderLabels() {
     numMoleculesValue.textContent = numMoleculesSlider.value;
-    colorCountValue.textContent = colorCountSlider.value;
+    simulationAreaValue.textContent = `${(simulationAreaSlider.value / 10).toFixed(1)}x`;
     miniParticleScaleValue.textContent = `${(miniParticleScaleSlider.value / 10).toFixed(1)}x`;
     lerpFactorValue.textContent = (lerpFactorSlider.value / 1000).toFixed(3);
     simSpeedValue.textContent = `${(simSpeedSlider.value / 10).toFixed(1)}x`;
@@ -362,7 +366,7 @@ chartTimeWindowSelect.addEventListener('change', () => {
 
 // Real-time slider updates
 const allSliders = [
-    numMoleculesSlider, colorCountSlider, miniParticleScaleSlider,
+    numMoleculesSlider, simulationAreaSlider, miniParticleScaleSlider,
     lerpFactorSlider, simSpeedSlider, spawnChanceSlider, decayChanceSlider,
     driftStrengthSlider, elasticitySlider, instabilityThresholdSlider, electronLifespanSlider
 ];
@@ -371,7 +375,8 @@ allSliders.forEach(slider => {
     slider.addEventListener('input', () => {
         updateSliderLabels();
         // Dynamically update runtime settings that do not require full reset
-        SETTINGS.colorCount = parseInt(colorCountSlider.value);
+        SETTINGS.simulationAreaScale = parseFloat(simulationAreaSlider.value) / 10;
+        updateBounds();
         SETTINGS.lerpFactor = parseFloat(lerpFactorSlider.value) / 1000;
         SETTINGS.simulationSpeed = parseFloat(simSpeedSlider.value) / 10;
         SETTINGS.spawnChanceMultiplier = parseFloat(spawnChanceSlider.value) / 10;
@@ -383,11 +388,21 @@ allSliders.forEach(slider => {
     });
 });
 
+colorCountSelect.addEventListener('change', () => {
+    SETTINGS.colorCount = parseInt(colorCountSelect.value);
+});
+
+btnAddTen.addEventListener('click', () => {
+    if (simulation) {
+        simulation.spawnMolecules(10);
+    }
+});
+
 // Click on simulation canvas
 canvas.addEventListener('click', (event) => {
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const x = (event.clientX - rect.left) * (SETTINGS.simulationAreaScale || 1.0);
+    const y = (event.clientY - rect.top) * (SETTINGS.simulationAreaScale || 1.0);
     simulation.handleCanvasClick(x, y);
 });
 

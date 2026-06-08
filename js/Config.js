@@ -61,6 +61,7 @@ export const SETTINGS = {
     // Sliders & Values
     numMolecules: 30,
     colorCount: 14,
+    simulationAreaScale: 1.0,
     miniParticleScale: 1.0,
     lerpFactor: 0.05,
     simulationSpeed: 1.0,

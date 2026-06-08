@@ -29,6 +29,9 @@
             <button id="btn-reset" class="dock-btn alert-btn" title="Reset Simulation">
                 <i data-lucide="rotate-ccw" class="icon"></i>
             </button>
+            <button id="btn-add-ten" class="dock-btn" title="Spawn 10 Random Molecules">
+                <i data-lucide="plus-circle" class="icon"></i>
+            </button>
         </div>
 
         <div class="vertical-divider"></div>
@@ -126,57 +129,72 @@
         
         <div id="config-controls">
             <!-- Numerical Parameters -->
-            <div class="control-group">
+            <div class="control-group" title="Initial Molecules: Sets the starting count of compound molecules generated on start.">
                 <label for="numMoleculesSlider">Initial Molecules: <span id="numMoleculesValue" class="slider-val">30</span></label>
                 <input type="range" id="numMoleculesSlider" min="10" max="100" value="30">
             </div>
             
-            <div class="control-group">
-                <label for="colorCountSlider">Color Palette Size: <span id="colorCountValue" class="slider-val">14</span></label>
-                <input type="range" id="colorCountSlider" min="1" max="14" value="14">
+            <div class="control-group" title="Max Palette Colors: Select the maximum number of distinct colors used to populate molecular structures.">
+                <label for="colorCountSelect">Max Palette Colors</label>
+                <div class="select-wrapper">
+                    <select id="colorCountSelect">
+                        <option value="2">2 Colors</option>
+                        <option value="4">4 Colors</option>
+                        <option value="6">6 Colors</option>
+                        <option value="8">8 Colors</option>
+                        <option value="10">10 Colors</option>
+                        <option value="12">12 Colors</option>
+                        <option value="14" selected>14 Colors (Max)</option>
+                    </select>
+                </div>
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Simulation Area Size: Scales the physical boundary size of the simulation relative to the viewport. Zoom out is applied automatically.">
+                <label for="simulationAreaSlider">Simulation Area Size: <span id="simulationAreaValue" class="slider-val">1.0x</span></label>
+                <input type="range" id="simulationAreaSlider" min="10" max="30" value="10">
+            </div>
+            
+            <div class="control-group" title="Discovery Item Scale: Adjusts the visual size of discovery canvas thumbnails in the bottom log.">
                 <label for="miniParticleScaleSlider">Discovery Item Scale: <span id="miniParticleScaleValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="miniParticleScaleSlider" min="5" max="20" value="10">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Time-scale Transition Smoothness: Determines how fast the slow-motion time dilation shifts during high energy events.">
                 <label for="lerpFactorSlider">Time-scale Transition Smoothness: <span id="lerpFactorValue" class="slider-val">0.050</span></label>
                 <input type="range" id="lerpFactorSlider" min="1" max="200" value="50">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Simulation Speed: Sets the speed multiplier of the physics timeline.">
                 <label for="simSpeedSlider">Simulation Speed: <span id="simSpeedValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="simSpeedSlider" min="1" max="50" value="10">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Spontaneous Gen Multiplier: Scales the frequency of random molecule generation in empty space.">
                 <label for="spawnChanceSlider">Spontaneous Gen Multiplier: <span id="spawnChanceValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="spawnChanceSlider" min="0" max="100" value="10">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Spontaneous Decay Multiplier: Scales the frequency of molecules randomly splitting into smaller parts.">
                 <label for="decayChanceSlider">Spontaneous Decay Multiplier: <span id="decayChanceValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="decayChanceSlider" min="0" max="100" value="10">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Quantum Drift Strength: Controls the amplitude of random quantum drift forces perpendicular to motion.">
                 <label for="driftStrengthSlider">Quantum Drift Strength: <span id="driftStrengthValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="driftStrengthSlider" min="0" max="30" value="10">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Collision Bounciness: Sets the Coefficient of Restitution: lower values are sticky, higher values bounce faster.">
                 <label for="elasticitySlider">Collision Bounciness: <span id="elasticityValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="elasticitySlider" min="2" max="15" value="10">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Instability Speed Limit: Sets the threshold velocity above which molecules destabilize and split.">
                 <label for="instabilityThresholdSlider">Instability Speed Limit: <span id="instabilityThresholdValue" class="slider-val">3.0</span></label>
                 <input type="range" id="instabilityThresholdSlider" min="10" max="50" value="30">
             </div>
             
-            <div class="control-group">
+            <div class="control-group" title="Electron Energy Lifespan: Controls the survival duration of free high-energy electrons before they decay.">
                 <label for="electronLifespanSlider">Electron Energy Lifespan: <span id="electronLifespanValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="electronLifespanSlider" min="2" max="30" value="10">
             </div>
@@ -184,7 +202,7 @@
             <hr class="divider">
 
             <!-- Dropdown Options -->
-            <div class="control-group">
+            <div class="control-group" title="Chart Time Window: Adjusts the moving average window timeframe displayed by the discovery analytics chart.">
                 <label for="chartTimeWindowSelect">Chart Time Window (Moving Avg)</label>
                 <div class="select-wrapper">
                     <select id="chartTimeWindowSelect">
@@ -194,8 +212,10 @@
                     </select>
                 </div>
             </div>
-            
-            <button id="resetButton" class="btn-primary">Apply &amp; Reset Simulation</button>
+        </div>
+        
+        <div id="config-footer">
+            <button id="resetButton" class="btn-primary" title="Apply configuration changes and reset the active simulation environment.">Apply &amp; Reset Simulation</button>
         </div>
     </aside>
 

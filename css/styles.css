@@ -163,7 +163,6 @@ canvas#simulationCanvas {
 .dock-btn:hover {
     color: var(--text-primary);
     background-color: rgba(255, 255, 255, 0.05);
-    transform: translateY(-2px);
 }
 
 /* Active Glow States for quick buttons */
@@ -504,6 +503,15 @@ canvas#simulationCanvas {
 
 .btn-primary:active {
     transform: translateY(1px);
+}
+
+#config-footer {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+    background-color: rgba(13, 17, 23, 0.95);
+    display: flex;
+    flex-direction: column;
 }
 
 /* Toggle Control Buttons */
