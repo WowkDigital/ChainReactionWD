@@ -48,6 +48,8 @@ canvas#simulationCanvas {
     top: 0;
     left: 0;
     z-index: 1;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 /* --- Top Floating Unified Dashboard Bar --- */
@@ -55,7 +57,7 @@ canvas#simulationCanvas {
     position: absolute;
     top: 1.25rem;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -69,6 +71,7 @@ canvas#simulationCanvas {
     z-index: 20;
     box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     transition: var(--transition-smooth);
+    will-change: transform;
 }
 
 .control-group-dock {
@@ -273,6 +276,8 @@ canvas#simulationCanvas {
     border: 1px solid var(--border-color);
     border-radius: 0.75rem;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    will-change: transform, opacity;
+    transform: translateZ(0);
 }
 
 /* --- Chart Widget --- */
@@ -326,15 +331,15 @@ canvas#simulationCanvas {
     -webkit-backdrop-filter: blur(18px);
     border-left: 1px solid var(--border-color);
     z-index: 30;
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex;
     flex-direction: column;
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+    will-change: transform;
 }
-
 #config-sidebar.open { 
-    transform: translateX(0); 
+    transform: translate3d(0, 0, 0); 
 }
 
 #config-header {
@@ -566,6 +571,8 @@ canvas#simulationCanvas {
     white-space: nowrap;
     z-index: 15;
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 #unique-combinations-bar::-webkit-scrollbar {

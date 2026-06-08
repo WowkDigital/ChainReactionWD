@@ -39,6 +39,8 @@ export default class Molecule extends Entity {
         } else {
             this.balls = this.createInitialBalls();
         }
+
+        this.spriteCanvas = null;
     }
 
     /**
@@ -56,6 +58,32 @@ export default class Molecule extends Entity {
             newBalls.push({ angle: angle, radius: 4, color: color });
         }
         return newBalls;
+    }
+
+    /**
+     * Caches the molecule sub-atoms onto an offscreen canvas sprite
+     */
+    cacheSprite() {
+        const size = Math.ceil(this.radius * 2 + 10);
+        this.spriteCanvas = document.createElement('canvas');
+        this.spriteCanvas.width = size;
+        this.spriteCanvas.height = size;
+        const sCtx = this.spriteCanvas.getContext('2d');
+        
+        const center = size / 2;
+        sCtx.translate(center, center);
+        
+        this.balls.forEach(ball => {
+            const ballRadius = 4;
+            const orbitRadius = this.radius - ballRadius;
+            const ballX = Math.cos(ball.angle) * orbitRadius;
+            const ballY = Math.sin(ball.angle) * orbitRadius;
+            
+            sCtx.beginPath();
+            sCtx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            sCtx.fillStyle = ball.color;
+            sCtx.fill();
+        });
     }
 
     /**
@@ -146,49 +174,39 @@ export default class Molecule extends Entity {
         ctx.translate(this.x + shakeX, this.y + shakeY);
         ctx.rotate(this.rotation);
 
-        // Draw quantum field glowing background (simulated glow via nested transparent circles to bypass slow shadowBlur)
+        // Draw quantum field glowing background (simulated glow via pre-rendered gradient)
         if (currentShakeIntensity > 0) {
-            const glowRadius = this.radius * 0.8 + currentShakeIntensity * 0.5; 
+            const glowRadius = (this.radius * 0.8 + currentShakeIntensity * 0.5) * 1.6; 
             const glowAlpha = Math.min(0.5, currentShakeIntensity / CONSTANTS.MAX_SHAKE_AMOUNT * 0.5);
             
-            // Outer glow ring
-            ctx.fillStyle = `rgba(255, 255, 255, ${glowAlpha * 0.25})`;
-            ctx.beginPath();
-            ctx.arc(0, 0, glowRadius * 1.6, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Mid glow ring
-            ctx.fillStyle = `rgba(255, 255, 255, ${glowAlpha * 0.5})`;
-            ctx.beginPath();
-            ctx.arc(0, 0, glowRadius * 1.25, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Inner glow ring
-            ctx.fillStyle = `rgba(255, 255, 255, ${glowAlpha * 0.8})`;
-            ctx.beginPath();
-            ctx.arc(0, 0, glowRadius * 0.9, 0, Math.PI * 2);
-            ctx.fill();
+            const oldAlpha = ctx.globalAlpha;
+            ctx.globalAlpha = oldAlpha * glowAlpha;
+            ctx.drawImage(getGlowSprite(), -glowRadius, -glowRadius, glowRadius * 2, glowRadius * 2);
+            ctx.globalAlpha = oldAlpha;
         }
 
-        // Draw orbiting sub-atoms
-        this.balls.forEach(ball => {
-            const ballRadius = 4;
-            const orbitRadius = this.radius - ballRadius;
-            const ballX = Math.cos(ball.angle) * orbitRadius;
-            const ballY = Math.sin(ball.angle) * orbitRadius;
-            
-            ctx.beginPath();
-            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-            
-            // Newly spawned/combined molecules fade in color from grayscale
-            if (this.invulnerabilityTimer > 0) {
+        // Draw orbiting sub-atoms (using offscreen cache if stable, drawing dynamically only during grayscale intro transition)
+        if (this.invulnerabilityTimer > 0) {
+            this.balls.forEach(ball => {
+                const ballRadius = 4;
+                const orbitRadius = this.radius - ballRadius;
+                const ballX = Math.cos(ball.angle) * orbitRadius;
+                const ballY = Math.sin(ball.angle) * orbitRadius;
+                
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+                
                 const transitionFactor = 1 - (this.invulnerabilityTimer / (CONSTANTS.INVULNERABILITY_DURATION * 2));
                 ctx.fillStyle = lerpColorToFull(ball.color, transitionFactor);
-            } else {
-                ctx.fillStyle = ball.color;
+                ctx.fill();
+            });
+        } else {
+            if (!this.spriteCanvas) {
+                this.cacheSprite();
             }
-            ctx.fill();
-        });
+            const offset = this.spriteCanvas.width / 2;
+            ctx.drawImage(this.spriteCanvas, -offset, -offset);
+        }
         ctx.restore();
     }
 
@@ -243,4 +261,30 @@ export default class Molecule extends Entity {
             electrons.push(new Electron(this.x, this.y, electrons.length));
         }
     }
+}
+
+// Global cached resources
+let glowSpriteCanvas = null;
+
+function getGlowSprite() {
+    if (glowSpriteCanvas) return glowSpriteCanvas;
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    
+    const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+    grad.addColorStop(0.25, 'rgba(255, 255, 255, 0.45)');
+    grad.addColorStop(0.6, 'rgba(255, 255, 255, 0.15)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(64, 64, 64, 0, Math.PI * 2);
+    ctx.fill();
+    
+    glowSpriteCanvas = canvas;
+    return glowSpriteCanvas;
 }

@@ -87,10 +87,10 @@ export default class Electron extends Entity {
         const fadeOutProgress = Math.max(0, this.lifespan / CONSTANTS.FADE_OUT_DURATION);
         const totalAlpha = Math.min(fadeInProgress, fadeOutProgress);
 
-        ctx.save();
-        ctx.globalAlpha = totalAlpha;
+        const oldAlpha = ctx.globalAlpha;
+        ctx.globalAlpha = oldAlpha * totalAlpha;
         // The sprite center is at offset 16 (half of width/height 32)
         ctx.drawImage(sprite, this.x - 16, this.y - 16);
-        ctx.restore();
+        ctx.globalAlpha = oldAlpha;
     }
 }

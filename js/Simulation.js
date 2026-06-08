@@ -102,22 +102,43 @@ export default class Simulation {
     /**
      * Checks electron collisions against stable molecules, converting electrons into collision-energy triggers
      */
+    /**
+     * Checks electron collisions against stable molecules, converting electrons into collision-energy triggers
+     */
     checkElectronCollisions() {
+        const maxRadius = 100; // Upper bound of molecule radius
         for (let i = this.electrons.length - 1; i >= 0; i--) {
             const electron = this.electrons[i];
             
-            for (let j = this.molecules.length - 1; j >= 0; j--) {
+            for (let j = 0; j < this.molecules.length; j++) {
                 const molecule = this.molecules[j];
                 
+                // Sweep-and-prune exit: since molecules are sorted by X, if the molecule's left edge
+                // is to the right of the electron's right edge, no subsequent molecules can collide.
+                if (molecule.x - electron.x > maxRadius + electron.radius) {
+                    break;
+                }
+
+                // If the molecule is too far to the left of the electron, skip it
+                if (electron.x - molecule.x > molecule.radius + electron.radius) {
+                    continue;
+                }
+
                 // Electrons can only hit stable molecules
                 if (molecule.markedForRemoval || molecule.invulnerabilityTimer > 0 || molecule.isUnstable) {
                     continue;
                 }
 
-                const dx = electron.x - molecule.x;
                 const dy = electron.y - molecule.y;
-                const distSq = dx * dx + dy * dy;
                 const minDist = electron.radius + molecule.radius;
+                
+                // Axis-aligned bounding box (AABB) quick Y-axis check
+                if (Math.abs(dy) >= minDist) {
+                    continue;
+                }
+
+                const dx = electron.x - molecule.x;
+                const distSq = dx * dx + dy * dy;
                 
                 // Optimized check using distance squared to bypass slow Math.sqrt
                 if (distSq < minDist * minDist) {
@@ -136,17 +157,30 @@ export default class Simulation {
      * Resolves molecular collisions: triggers high-energy combination, or executes elastic bounces
      */
     checkMoleculeCollisions() {
+        const maxRadius = 100; // Upper bound of molecule radius
         for (let i = 0; i < this.molecules.length; i++) {
+            const m1 = this.molecules[i];
+            if (m1.markedForRemoval) continue;
+
             for (let j = i + 1; j < this.molecules.length; j++) {
-                const m1 = this.molecules[i];
                 const m2 = this.molecules[j];
 
-                if (m1.markedForRemoval || m2.markedForRemoval) continue;
+                // Sweep-and-prune exit: m2 is sorted to the right of m1.
+                // If the distance along X axis exceeds the maximum possible combined radius, break.
+                if (m2.x - m1.x > m1.radius + maxRadius) {
+                    break;
+                }
+
+                if (m2.markedForRemoval) continue;
 
                 const dx = m2.x - m1.x;
                 const dy = m2.y - m1.y;
-                const distSq = dx * dx + dy * dy;
                 const minDist = m1.radius + m2.radius;
+
+                // Quick AABB Y-axis check to skip distance squaring
+                if (Math.abs(dy) >= minDist) continue;
+
+                const distSq = dx * dx + dy * dy;
 
                 // Optimization: Skip Math.sqrt unless particles are overlapping
                 if (distSq < minDist * minDist) {
@@ -352,6 +386,9 @@ export default class Simulation {
 
         // Physics steps (only if not paused)
         if (!SETTINGS.isPaused) {
+            // Sort molecules along the X-axis to enable Sweep-and-Prune collision detection
+            this.molecules.sort((a, b) => a.x - b.x);
+
             this.checkElectronCollisions();
             this.checkMoleculeCollisions();
             this.handleSpontaneousEvents();
