@@ -9,9 +9,21 @@ const statsBar = document.getElementById('stats-bar');
 const uniqueCombinationsBar = document.getElementById('unique-combinations-bar');
 const chartContainer = document.getElementById('chart-container');
 const configSidebar = document.getElementById('config-sidebar');
-const configToggleBtn = document.getElementById('config-toggle');
 const configCloseBtn = document.getElementById('config-close');
 const applyResetBtn = document.getElementById('resetButton');
+
+// Quick Control Dock Buttons
+const btnPlayPause = document.getElementById('btn-play-pause');
+const btnModeDecay = document.getElementById('btn-mode-decay');
+const btnModeSpawn = document.getElementById('btn-mode-spawn');
+const btnSpontaneousGen = document.getElementById('btn-spontaneous-gen');
+const btnSpontaneousDecay = document.getElementById('btn-spontaneous-decay');
+const btnScreenWrap = document.getElementById('btn-screen-wrap');
+const btnToggleStats = document.getElementById('btn-toggle-stats');
+const btnToggleChart = document.getElementById('btn-toggle-chart');
+const btnToggleDiscoveries = document.getElementById('btn-toggle-discoveries');
+const btnReset = document.getElementById('btn-reset');
+const btnSettingsToggle = document.getElementById('btn-settings-toggle');
 
 // Stats Displays
 const simTimeDisplay = document.getElementById('simTimeDisplay');
@@ -36,13 +48,8 @@ const spawnChanceValue = document.getElementById('spawnChanceValue');
 const decayChanceSlider = document.getElementById('decayChanceSlider');
 const decayChanceValue = document.getElementById('decayChanceValue');
 
-// Config Selects & Checkboxes
+// Config Selects
 const chartTimeWindowSelect = document.getElementById('chartTimeWindowSelect');
-const showChartCheck = document.getElementById('showChartCheck');
-const spontaneousGenerationCheck = document.getElementById('spontaneousGenerationCheck');
-const spontaneousDecayCheck = document.getElementById('spontaneousDecayCheck');
-const addParticleCheck = document.getElementById('addParticleCheck');
-const noBoundingBoxCheck = document.getElementById('noBoundingBoxCheck');
 
 // Managers
 const chartManager = new ChartManager('discoveryChart');
@@ -57,8 +64,13 @@ function updateBounds() {
     
     SETTINGS.width = canvas.width;
     SETTINGS.height = canvas.height;
-    SETTINGS.topBoundary = statsBar.offsetHeight + 10;
-    SETTINGS.bottomBoundary = uniqueCombinationsBar.offsetTop - 10;
+
+    // Shift boundary depending on whether panels are visible
+    const statsVisible = !statsBar.classList.contains('hidden');
+    SETTINGS.topBoundary = statsVisible ? (statsBar.offsetHeight + 10) : 10;
+    
+    const discoveriesVisible = !uniqueCombinationsBar.classList.contains('hidden');
+    SETTINGS.bottomBoundary = discoveriesVisible ? (uniqueCombinationsBar.offsetTop - 10) : (canvas.height - 10);
 }
 
 /**
@@ -170,14 +182,75 @@ function synchronizeConfig() {
     SETTINGS.decayChanceMultiplier = parseFloat(decayChanceSlider.value) / 10;
     SETTINGS.chartTimeWindow = parseInt(chartTimeWindowSelect.value, 10);
     
-    SETTINGS.showChart = showChartCheck.checked;
-    SETTINGS.spontaneousGeneration = spontaneousGenerationCheck.checked;
-    SETTINGS.spontaneousDecay = spontaneousDecayCheck.checked;
-    SETTINGS.addParticleOnClick = addParticleCheck.checked;
-    SETTINGS.noBoundingBox = noBoundingBoxCheck.checked;
-
-    // Toggle widgets according to choices
+    // Sync visibility of containers directly from settings
+    statsBar.classList.toggle('hidden', !SETTINGS.showStats);
     chartContainer.classList.toggle('hidden', !SETTINGS.showChart);
+    uniqueCombinationsBar.classList.toggle('hidden', !SETTINGS.showDiscoveries);
+}
+
+/**
+ * Updates active classes on the floating control dock buttons
+ */
+function syncDockButtonsFromSettings() {
+    // 1. Play/Pause
+    const playIcon = btnPlayPause.querySelector('.icon-play');
+    const pauseIcon = btnPlayPause.querySelector('.icon-pause');
+    if (SETTINGS.isPaused) {
+        btnPlayPause.classList.add('paused');
+        btnPlayPause.classList.remove('active');
+        playIcon?.classList.remove('hidden');
+        pauseIcon?.classList.add('hidden');
+        btnPlayPause.setAttribute('aria-label', 'Resume Simulation');
+    } else {
+        btnPlayPause.classList.remove('paused');
+        btnPlayPause.classList.add('active');
+        playIcon?.classList.add('hidden');
+        pauseIcon?.classList.remove('hidden');
+        btnPlayPause.setAttribute('aria-label', 'Pause Simulation');
+    }
+
+    // 2. Interaction Mode
+    if (SETTINGS.addParticleOnClick) {
+        btnModeSpawn.classList.add('active');
+        btnModeSpawn.setAttribute('aria-pressed', 'true');
+        btnModeDecay.classList.remove('active');
+        btnModeDecay.setAttribute('aria-pressed', 'false');
+    } else {
+        btnModeDecay.classList.add('active');
+        btnModeDecay.setAttribute('aria-pressed', 'true');
+        btnModeSpawn.classList.remove('active');
+        btnModeSpawn.setAttribute('aria-pressed', 'false');
+    }
+
+    // 3. Spontaneous Generation
+    btnSpontaneousGen.classList.toggle('active', SETTINGS.spontaneousGeneration);
+    btnSpontaneousGen.setAttribute('aria-pressed', SETTINGS.spontaneousGeneration ? 'true' : 'false');
+
+    // 4. Spontaneous Decay
+    btnSpontaneousDecay.classList.toggle('active', SETTINGS.spontaneousDecay);
+    btnSpontaneousDecay.setAttribute('aria-pressed', SETTINGS.spontaneousDecay ? 'true' : 'false');
+
+    // 5. Screen Wrap
+    btnScreenWrap.classList.toggle('active', SETTINGS.noBoundingBox);
+    btnScreenWrap.setAttribute('aria-pressed', SETTINGS.noBoundingBox ? 'true' : 'false');
+
+    // 6. Show Stats
+    btnToggleStats.classList.toggle('active', SETTINGS.showStats);
+    btnToggleStats.setAttribute('aria-pressed', SETTINGS.showStats ? 'true' : 'false');
+    statsBar.classList.toggle('hidden', !SETTINGS.showStats);
+
+    // 7. Show Chart
+    btnToggleChart.classList.toggle('active', SETTINGS.showChart);
+    btnToggleChart.setAttribute('aria-pressed', SETTINGS.showChart ? 'true' : 'false');
+    chartContainer.classList.toggle('hidden', !SETTINGS.showChart);
+
+    // 8. Show Discoveries
+    btnToggleDiscoveries.classList.toggle('active', SETTINGS.showDiscoveries);
+    btnToggleDiscoveries.setAttribute('aria-pressed', SETTINGS.showDiscoveries ? 'true' : 'false');
+    uniqueCombinationsBar.classList.toggle('hidden', !SETTINGS.showDiscoveries);
+
+    // Refresh bounds since visible components shifted borders
+    updateBounds();
 }
 
 /**
@@ -212,43 +285,69 @@ function start() {
     uniqueCombinationsBar.innerHTML = '';
     chartManager.reset();
     simulation.init();
+    syncDockButtonsFromSettings();
 }
 
-// Event Listeners for Config Panel
-configToggleBtn.addEventListener('click', () => {
-    configSidebar.classList.add('open');
-    configToggleBtn.classList.add('hidden');
-    configToggleBtn.setAttribute('aria-expanded', 'true');
+// Quick Control Dock Event Listeners
+btnPlayPause.addEventListener('click', () => {
+    SETTINGS.isPaused = !SETTINGS.isPaused;
+    syncDockButtonsFromSettings();
 });
 
+btnModeDecay.addEventListener('click', () => {
+    SETTINGS.addParticleOnClick = false;
+    syncDockButtonsFromSettings();
+});
+
+btnModeSpawn.addEventListener('click', () => {
+    SETTINGS.addParticleOnClick = true;
+    syncDockButtonsFromSettings();
+});
+
+btnSpontaneousGen.addEventListener('click', () => {
+    SETTINGS.spontaneousGeneration = !SETTINGS.spontaneousGeneration;
+    syncDockButtonsFromSettings();
+});
+
+btnSpontaneousDecay.addEventListener('click', () => {
+    SETTINGS.spontaneousDecay = !SETTINGS.spontaneousDecay;
+    syncDockButtonsFromSettings();
+});
+
+btnScreenWrap.addEventListener('click', () => {
+    SETTINGS.noBoundingBox = !SETTINGS.noBoundingBox;
+    syncDockButtonsFromSettings();
+});
+
+btnToggleStats.addEventListener('click', () => {
+    SETTINGS.showStats = !SETTINGS.showStats;
+    syncDockButtonsFromSettings();
+});
+
+btnToggleChart.addEventListener('click', () => {
+    SETTINGS.showChart = !SETTINGS.showChart;
+    syncDockButtonsFromSettings();
+});
+
+btnToggleDiscoveries.addEventListener('click', () => {
+    SETTINGS.showDiscoveries = !SETTINGS.showDiscoveries;
+    syncDockButtonsFromSettings();
+});
+
+btnReset.addEventListener('click', start);
+
+btnSettingsToggle.addEventListener('click', () => {
+    configSidebar.classList.toggle('open');
+});
+
+// Sidebar Close Event
 configCloseBtn.addEventListener('click', () => {
     configSidebar.classList.remove('open');
-    configToggleBtn.classList.remove('hidden');
-    configToggleBtn.setAttribute('aria-expanded', 'false');
 });
 
-applyResetBtn.addEventListener('click', start);
-
-// Immediate setting synchronizations on checkbox toggle
-showChartCheck.addEventListener('change', () => {
-    SETTINGS.showChart = showChartCheck.checked;
-    chartContainer.classList.toggle('hidden', !SETTINGS.showChart);
-});
-
-spontaneousGenerationCheck.addEventListener('change', () => {
-    SETTINGS.spontaneousGeneration = spontaneousGenerationCheck.checked;
-});
-
-spontaneousDecayCheck.addEventListener('change', () => {
-    SETTINGS.spontaneousDecay = spontaneousDecayCheck.checked;
-});
-
-addParticleCheck.addEventListener('change', () => {
-    SETTINGS.addParticleOnClick = addParticleCheck.checked;
-});
-
-noBoundingBoxCheck.addEventListener('change', () => {
-    SETTINGS.noBoundingBox = noBoundingBoxCheck.checked;
+applyResetBtn.addEventListener('click', () => {
+    start();
+    configSidebar.classList.remove('open');
 });
 
 chartTimeWindowSelect.addEventListener('change', () => {
@@ -303,6 +402,11 @@ setInterval(() => {
 function animate() {
     simulation.tick();
     requestAnimationFrame(animate);
+}
+
+// Initial Lucide trigger if script loaded
+if (window.lucide) {
+    window.lucide.createIcons();
 }
 
 // Begin animation

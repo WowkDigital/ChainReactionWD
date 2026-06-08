@@ -68,7 +68,10 @@ export const SETTINGS = {
     decayChanceMultiplier: 1.0,
     
     // Checkboxes / Modes
-    showChart: true,
+    showChart: false,
+    showStats: false,
+    showDiscoveries: false,
+    isPaused: false,
     spontaneousGeneration: false,
     spontaneousDecay: false,
     addParticleOnClick: false,

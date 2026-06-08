@@ -36,7 +36,9 @@ export default class Simulation {
         this.molecules = [];
         this.electrons = [];
         this.uniqueCombinationsSet.clear();
-        this.simulationStartTime = performance.now();
+        
+        this.lastTickTime = performance.now();
+        this.elapsedTimeAccumulated = 0;
         
         // Reset config context
         SETTINGS.autoTimeScale = 1.0;
@@ -296,10 +298,19 @@ export default class Simulation {
      * Frame ticker: updates entities, processes collisions, redraws canvas, triggers UI state reports
      */
     tick() {
-        // Compute slow-motion scale from active electrons
-        const targetAutoTimeScale = calculateAutoTimeScale(this.electrons.length);
-        SETTINGS.autoTimeScale += (targetAutoTimeScale - SETTINGS.autoTimeScale) * SETTINGS.lerpFactor;
-        SETTINGS.effectiveTimeScale = SETTINGS.autoTimeScale * SETTINGS.simulationSpeed;
+        const now = performance.now();
+        const frameTime = now - this.lastTickTime;
+        this.lastTickTime = now;
+
+        if (!SETTINGS.isPaused) {
+            this.elapsedTimeAccumulated += frameTime;
+            
+            // Compute slow-motion scale from active electrons
+            const targetAutoTimeScale = calculateAutoTimeScale(this.electrons.length);
+            SETTINGS.autoTimeScale += (targetAutoTimeScale - SETTINGS.autoTimeScale) * SETTINGS.lerpFactor;
+        }
+        
+        SETTINGS.effectiveTimeScale = SETTINGS.isPaused ? 0 : (SETTINGS.autoTimeScale * SETTINGS.simulationSpeed);
 
         // Reset canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -310,26 +321,30 @@ export default class Simulation {
             registerDiscovery: this.registerDiscovery.bind(this)
         };
 
-        // Update entities
-        this.molecules.forEach(m => m.update(context));
-        this.electrons.forEach(e => e.update());
+        // Update entities (only if not paused)
+        if (!SETTINGS.isPaused) {
+            this.molecules.forEach(m => m.update(context));
+            this.electrons.forEach(e => e.update());
+        }
 
-        // Draw entities
+        // Draw entities (always draw)
         this.molecules.forEach(m => m.draw(this.ctx));
         this.electrons.forEach(e => e.draw(this.ctx));
 
-        // Physics steps
-        this.checkElectronCollisions();
-        this.checkMoleculeCollisions();
-        this.handleSpontaneousEvents();
+        // Physics steps (only if not paused)
+        if (!SETTINGS.isPaused) {
+            this.checkElectronCollisions();
+            this.checkMoleculeCollisions();
+            this.handleSpontaneousEvents();
 
-        // Clear references marked for cleanup
-        this.molecules = this.molecules.filter(m => !m.markedForRemoval);
-        this.electrons = this.electrons.filter(e => !e.markedForRemoval);
+            // Clear references marked for cleanup
+            this.molecules = this.molecules.filter(m => !m.markedForRemoval);
+            this.electrons = this.electrons.filter(e => !e.markedForRemoval);
+        }
 
         // Report real-time stats to UI layer
         if (this.callbacks.onStatsUpdate) {
-            const elapsed = Math.floor((performance.now() - this.simulationStartTime) / 1000);
+            const elapsed = Math.floor(this.elapsedTimeAccumulated / 1000);
             this.callbacks.onStatsUpdate({
                 elapsedSeconds: elapsed,
                 molecules: this.molecules.length,

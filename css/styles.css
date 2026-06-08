@@ -1,21 +1,27 @@
 :root {
     --bg-color: #080b10;
-    --surface-color: rgba(22, 27, 34, 0.75);
+    --surface-color: rgba(18, 22, 29, 0.75);
     --surface-solid: #161B22;
-    --border-color: rgba(48, 54, 61, 0.65);
-    --border-glow: rgba(59, 130, 246, 0.2);
+    --border-color: rgba(48, 54, 61, 0.6);
+    --border-glow: rgba(59, 130, 246, 0.15);
     --text-primary: #f0f6fc;
     --text-secondary: #8b949e;
     
     --accent-blue: #3b82f6;
     --accent-blue-hover: #1d4ed8;
-    --accent-blue-glow: rgba(59, 130, 246, 0.4);
+    --accent-blue-glow: rgba(59, 130, 246, 0.45);
     --accent-yellow: #fbbf24;
+    --accent-yellow-glow: rgba(251, 191, 36, 0.45);
+    --accent-red: #ef4444;
+    --accent-red-glow: rgba(239, 68, 68, 0.4);
+    --accent-green: #10b981;
+    --accent-green-glow: rgba(16, 185, 129, 0.4);
     
     --font-body: 'Inter', sans-serif;
     --font-mono: 'Roboto Mono', monospace;
     
     --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* --- Base Reset & Page Styles --- */
@@ -53,11 +59,11 @@ canvas#simulationCanvas {
     display: flex; 
     justify-content: center; 
     align-items: center;
-    gap: 1.5rem; 
-    padding: 0.75rem 1.75rem; 
+    gap: 1.25rem; 
+    padding: 0.6rem 1.5rem; 
     background: var(--surface-color); 
-    backdrop-filter: blur(12px); 
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px); 
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--border-color);
     border-radius: 9999px;
     font-size: 0.85rem; 
@@ -72,6 +78,24 @@ canvas#simulationCanvas {
     gap: 0.5rem;
 }
 
+.stat-icon {
+    width: 1rem;
+    height: 1rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: var(--transition-smooth);
+}
+
+.stat-item:hover .stat-icon {
+    transform: scale(1.15);
+    color: var(--text-primary);
+}
+
+.stat-icon.glow-yellow {
+    color: var(--accent-yellow);
+    filter: drop-shadow(0 0 4px var(--accent-yellow-glow));
+}
+
 .stat-item .label { 
     font-weight: 600;
     color: var(--text-secondary);
@@ -83,15 +107,155 @@ canvas#simulationCanvas {
     font-weight: 600; 
     color: var(--text-primary);
     font-family: var(--font-mono);
-    min-width: 3.5ch;
+    min-width: 3ch;
     display: inline-block;
     text-align: left;
 }
 
 .stat-divider {
-    height: 14px;
+    height: 12px;
     width: 1px;
     background-color: var(--border-color);
+}
+
+/* --- Floating Control Dock (Bottom Center) --- */
+#control-dock {
+    position: absolute;
+    bottom: 135px; /* Directly above bottom combinations drawer */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    height: 52px;
+    background: var(--surface-color);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    z-index: 20;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: var(--transition-smooth);
+}
+
+.dock-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    outline: none;
+    transition: var(--transition-smooth);
+    position: relative;
+}
+
+.dock-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.dock-btn:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Active Glow States for quick buttons */
+.dock-btn.active {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.09);
+    border-color: var(--border-color);
+}
+
+#btn-play-pause.active {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+#btn-play-pause.paused {
+    color: var(--accent-yellow);
+    border-color: var(--accent-yellow);
+    box-shadow: 0 0 10px var(--accent-yellow-glow);
+}
+
+#btn-spontaneous-gen.active {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue-glow);
+}
+
+#btn-spontaneous-decay.active {
+    color: #a855f7; /* Purple */
+    border-color: #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+#btn-screen-wrap.active {
+    color: var(--accent-yellow);
+    border-color: var(--accent-yellow);
+    box-shadow: 0 0 10px var(--accent-yellow-glow);
+}
+
+#btn-toggle-chart.active {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue-glow);
+}
+
+/* Alert reset button hover */
+.dock-btn.alert-btn:hover {
+    color: var(--accent-red);
+    border-color: var(--accent-red);
+    box-shadow: 0 0 10px var(--accent-red-glow);
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+/* Settings rotation effect on hover */
+#btn-settings-toggle:hover svg {
+    transform: rotate(45deg);
+}
+#btn-settings-toggle svg {
+    transition: transform 0.4s ease;
+}
+
+.dock-divider {
+    width: 1px;
+    height: 20px;
+    background-color: var(--border-color);
+    margin: 0 0.25rem;
+}
+
+/* --- Segmented Control (Pill Switch) --- */
+.segmented-control {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    padding: 2px;
+}
+
+.segmented-control .dock-btn {
+    border-radius: 9999px;
+    width: 32px;
+    height: 32px;
+}
+
+.segmented-control .dock-btn.active {
+    background-color: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue-glow);
+}
+
+/* --- Helper Classes --- */
+.hidden {
+    display: none !important;
 }
 
 /* --- Floating Widgets & Sidebars --- */
@@ -107,7 +271,7 @@ canvas#simulationCanvas {
 /* --- Chart Widget --- */
 #chart-container {
     position: absolute;
-    bottom: 140px; /* Sits comfortably above bottom bar */
+    bottom: 200px; /* Elevated to sit clearly above bottom controls */
     left: 1.25rem;
     width: 320px;
     height: 180px;
@@ -150,9 +314,9 @@ canvas#simulationCanvas {
     width: 360px;
     max-width: 90vw;
     height: 100%;
-    background-color: rgba(13, 17, 23, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background-color: rgba(13, 17, 23, 0.88);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     border-left: 1px solid var(--border-color);
     z-index: 30;
     transform: translateX(100%);
@@ -309,84 +473,6 @@ canvas#simulationCanvas {
     margin: 0.5rem 0;
 }
 
-/* Checkbox Toggle Container */
-.checkbox-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-/* Custom Checkbox Design */
-.checkbox-group { 
-    display: flex; 
-    align-items: center; 
-    gap: 0.75rem; 
-    color: var(--text-primary); 
-    font-size: 0.875rem;
-    background-color: rgba(255, 255, 255, 0.02);
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    user-select: none;
-}
-
-.checkbox-group:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: var(--border-color);
-}
-
-.checkbox-group input { 
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.custom-checkbox {
-    height: 18px;
-    width: 18px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    display: inline-block;
-    position: relative;
-    transition: var(--transition-smooth);
-}
-
-.checkbox-group:hover .custom-checkbox {
-    border-color: var(--accent-blue);
-}
-
-.checkbox-group input:checked ~ .custom-checkbox {
-    background-color: var(--accent-blue);
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 8px var(--accent-blue-glow);
-}
-
-.custom-checkbox::after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 5px;
-    top: 2px;
-    width: 5px;
-    height: 9px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.checkbox-group input:checked ~ .custom-checkbox::after {
-    display: block;
-}
-
-.checkbox-label {
-    font-weight: 500;
-}
-
 /* --- Buttons --- */
 .btn-primary { 
     padding: 0.85rem 1rem; 
@@ -414,17 +500,13 @@ canvas#simulationCanvas {
 
 /* Toggle Control Buttons */
 .toggle-button {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.5rem;
-    z-index: 40;
     background: var(--surface-color);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-color);
     border-radius: 50%;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -441,15 +523,8 @@ canvas#simulationCanvas {
 }
 
 .toggle-button svg {
-    width: 1.25rem;
-    height: 1.25rem;
-}
-
-.toggle-button.hidden {
-    opacity: 0;
-    transform: scale(0.8);
-    visibility: hidden;
-    pointer-events: none;
+    width: 1.15rem;
+    height: 1.15rem;
 }
 
 /* --- Unique Combinations Drawer (Bottom) --- */

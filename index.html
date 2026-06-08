@@ -11,49 +11,125 @@
     <link rel="stylesheet" href="css/styles.css">
     <!-- Chart.js for visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <!-- Background Canvas for the Quantum Simulation -->
     <canvas id="simulationCanvas"></canvas>
 
-    <!-- Top floating dashboard for real-time statistics -->
-    <header id="stats-bar" role="banner">
-        <div class="stat-item">
+    <!-- Top floating dashboard for real-time statistics (Hidden by default) -->
+    <header id="stats-bar" class="hidden" role="banner">
+        <div class="stat-item" title="Elapsed Time">
+            <i data-lucide="clock" class="stat-icon"></i>
             <span class="label">Time:</span>
             <span id="simTimeDisplay" class="value">00:00</span>
         </div>
+        
         <div class="stat-divider"></div>
-        <div class="stat-item">
+        
+        <div class="stat-item" title="Active Molecules">
+            <i data-lucide="orbit" class="stat-icon"></i>
             <span class="label">Molecules:</span>
             <span id="moleculeCountDisplay" class="value">000</span>
         </div>
+        
         <div class="stat-divider"></div>
-        <div class="stat-item">
+        
+        <div class="stat-item" title="Free Electrons (Energy)">
+            <i data-lucide="zap" class="stat-icon glow-yellow"></i>
             <span class="label">Electrons:</span>
             <span id="electronCountDisplay" class="value">000</span>
         </div>
+        
         <div class="stat-divider"></div>
-        <div class="stat-item">
-            <span class="label">Combinations:</span>
+        
+        <div class="stat-item" title="Discovered Unique Combinations">
+            <i data-lucide="flask-conical" class="stat-icon"></i>
+            <span class="label">Combos:</span>
             <span id="uniqueCombinationsDisplay" class="value">000</span>
         </div>
+        
         <div class="stat-divider"></div>
-        <div class="stat-item">
+        
+        <div class="stat-item" title="Dynamic Time Dilated Slowdown">
+            <i data-lucide="gauge" class="stat-icon"></i>
             <span class="label">Slowdown:</span>
             <span id="timeScaleDisplay" class="value">0%</span>
         </div>
     </header>
 
-    <!-- Floating configuration panel toggle button -->
-    <button id="config-toggle" class="toggle-button" aria-label="Open Settings" aria-expanded="false" aria-controls="config-sidebar">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.424.35.534.954.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-    </button>
+    <!-- Center-Bottom Command Dock for quick settings and interactions -->
+    <nav id="control-dock" class="glass-panel" role="navigation" aria-label="Simulation Controls">
+        <!-- Play / Pause -->
+        <button id="btn-play-pause" class="dock-btn active" aria-label="Pause Simulation" title="Play/Pause Simulation">
+            <i data-lucide="pause" class="icon icon-pause"></i>
+            <i data-lucide="play" class="icon icon-play hidden"></i>
+        </button>
 
-    <!-- Floating rate of discovery graph widget -->
-    <section id="chart-container" class="glass-panel" aria-label="Discovery Analytics">
+        <div class="dock-divider"></div>
+
+        <!-- Mouse Interaction Mode (Segmented Toggle) -->
+        <div class="segmented-control" role="group" aria-label="Mouse Pointer Mode">
+            <button id="btn-mode-decay" class="dock-btn active" aria-pressed="true" title="Click Mode: Trigger Decay (Click molecule to split it)">
+                <i data-lucide="zap" class="icon"></i>
+            </button>
+            <button id="btn-mode-spawn" class="dock-btn" aria-pressed="false" title="Click Mode: Spawn Molecule (Click space to inject)">
+                <i data-lucide="plus" class="icon"></i>
+            </button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- Spontaneous Generation Toggle -->
+        <button id="btn-spontaneous-gen" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Generation">
+            <i data-lucide="sparkles" class="icon"></i>
+        </button>
+
+        <!-- Spontaneous Decay Toggle -->
+        <button id="btn-spontaneous-decay" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Decay">
+            <i data-lucide="split" class="icon"></i>
+        </button>
+
+        <!-- Screen Wrapping Toggle -->
+        <button id="btn-screen-wrap" class="dock-btn" aria-pressed="false" title="Toggle Screen Wrap / Boundaries">
+            <i data-lucide="infinity" class="icon"></i>
+        </button>
+
+        <div class="dock-divider"></div>
+
+        <!-- Toggle Stats Dashboard (Eye Icon) -->
+        <button id="btn-toggle-stats" class="dock-btn" aria-pressed="false" title="Toggle Stats Dashboard">
+            <i data-lucide="eye" class="icon"></i>
+        </button>
+
+        <!-- Show Chart Toggle (Activity Icon) -->
+        <button id="btn-toggle-chart" class="dock-btn" aria-pressed="false" title="Toggle Discovery Chart">
+            <i data-lucide="activity" class="icon"></i>
+        </button>
+
+        <!-- Toggle Discoveries Log (History Icon) -->
+        <button id="btn-toggle-discoveries" class="dock-btn" aria-pressed="false" title="Toggle Discoveries Log">
+            <i data-lucide="history" class="icon"></i>
+        </button>
+
+        <div class="dock-divider"></div>
+
+        <!-- Reset Button -->
+        <button id="btn-reset" class="dock-btn alert-btn" title="Reset Simulation">
+            <i data-lucide="rotate-ccw" class="icon"></i>
+        </button>
+
+        <div class="dock-divider"></div>
+
+        <!-- Open Settings -->
+        <button id="btn-settings-toggle" class="dock-btn" title="Open Custom Quantities Panel">
+            <i data-lucide="sliders" class="icon"></i>
+        </button>
+    </nav>
+
+    <!-- Floating rate of discovery graph widget (Hidden by default) -->
+    <section id="chart-container" class="glass-panel hidden" aria-label="Discovery Analytics">
         <div class="chart-header">
             <h3>Discovery Rate</h3>
         </div>
@@ -62,14 +138,12 @@
         </div>
     </section>
 
-    <!-- Slide-out Configuration Sidebar -->
-    <aside id="config-sidebar" role="complementary" aria-label="Simulation Settings">
+    <!-- Slide-out Configuration Sidebar (Sliders only) -->
+    <aside id="config-sidebar" role="complementary" aria-label="Simulation Parameters">
         <div id="config-header">
             <h2>Simulation Setup</h2>
             <button id="config-close" class="toggle-button" aria-label="Close Settings">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <i data-lucide="x"></i>
             </button>
         </div>
         
@@ -101,12 +175,12 @@
             </div>
             
             <div class="control-group">
-                <label for="spawnChanceSlider">Spontaneous Generation Rate: <span id="spawnChanceValue" class="slider-val">1.0x</span></label>
+                <label for="spawnChanceSlider">Spontaneous Gen Multiplier: <span id="spawnChanceValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="spawnChanceSlider" min="0" max="100" value="10">
             </div>
             
             <div class="control-group">
-                <label for="decayChanceSlider">Spontaneous Decay Rate: <span id="decayChanceValue" class="slider-val">1.0x</span></label>
+                <label for="decayChanceSlider">Spontaneous Decay Multiplier: <span id="decayChanceValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="decayChanceSlider" min="0" max="100" value="10">
             </div>
             
@@ -123,46 +197,13 @@
                     </select>
                 </div>
             </div>
-
-            <!-- Toggles / Checkboxes -->
-            <div class="checkbox-container">
-                <label class="checkbox-group">
-                    <input type="checkbox" id="showChartCheck" checked>
-                    <span class="custom-checkbox"></span>
-                    <span class="checkbox-label">Show Discovery Graph</span>
-                </label>
-                
-                <label class="checkbox-group">
-                    <input type="checkbox" id="spontaneousGenerationCheck">
-                    <span class="custom-checkbox"></span>
-                    <span class="checkbox-label">Spontaneous Generation</span>
-                </label>
-                
-                <label class="checkbox-group">
-                    <input type="checkbox" id="spontaneousDecayCheck">
-                    <span class="custom-checkbox"></span>
-                    <span class="checkbox-label">Spontaneous Decay</span>
-                </label>
-                
-                <label class="checkbox-group">
-                    <input type="checkbox" id="addParticleCheck">
-                    <span class="custom-checkbox"></span>
-                    <span class="checkbox-label">Spawn Molecule on Click</span>
-                </label>
-                
-                <label class="checkbox-group">
-                    <input type="checkbox" id="noBoundingBoxCheck">
-                    <span class="custom-checkbox"></span>
-                    <span class="checkbox-label">Screen Wrap (No Boundaries)</span>
-                </label>
-            </div>
             
             <button id="resetButton" class="btn-primary">Apply &amp; Reset Simulation</button>
         </div>
     </aside>
 
-    <!-- Bottom Drawer for Log of Discovered Unique Combinations -->
-    <footer id="unique-combinations-bar" role="contentinfo" aria-label="Discovered Molecule Combinations">
+    <!-- Bottom Drawer for Log of Discovered Unique Combinations (Hidden by default) -->
+    <footer id="unique-combinations-bar" class="hidden" role="contentinfo" aria-label="Discovered Molecule Combinations">
         <!-- Discovered unique combinations will be injected here dynamically -->
     </footer>
 
