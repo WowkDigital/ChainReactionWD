@@ -217,8 +217,12 @@ export default class Simulation {
                         const v1 = { x: m1.vx * cos + m1.vy * sin, y: m1.vy * cos - m1.vx * sin };
                         const v2 = { x: m2.vx * cos + m2.vy * sin, y: m2.vy * cos - m2.vx * sin };
 
-                        // Swap horizontal components
-                        [v1.x, v2.x] = [v2.x, v1.x];
+                        // Restitution swap (elasticity coefficient)
+                        const e = SETTINGS.elasticity;
+                        const sumVel = v1.x + v2.x;
+                        const diffVel = -e * (v1.x - v2.x);
+                        v1.x = (sumVel + diffVel) / 2;
+                        v2.x = (sumVel - diffVel) / 2;
 
                         // Rotate velocities back
                         m1.vx = v1.x * cos - v1.y * sin;

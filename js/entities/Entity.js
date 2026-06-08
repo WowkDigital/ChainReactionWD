@@ -40,8 +40,8 @@ export default class Entity {
             const perpX = -this.vy / speed;
             const perpY = this.vx / speed;
             
-            this.vx += perpX * this.driftStrength * dt;
-            this.vy += perpY * this.driftStrength * dt;
+            this.vx += perpX * this.driftStrength * SETTINGS.driftStrengthMultiplier * dt;
+            this.vy += perpY * this.driftStrength * SETTINGS.driftStrengthMultiplier * dt;
         }
 
         // Apply translation

@@ -66,6 +66,10 @@ export const SETTINGS = {
     simulationSpeed: 1.0,
     spawnChanceMultiplier: 1.0,
     decayChanceMultiplier: 1.0,
+    driftStrengthMultiplier: 1.0,
+    elasticity: 1.0,
+    instabilityThreshold: 3.0,
+    electronLifespanMultiplier: 1.0,
     
     // Checkboxes / Modes
     showChart: false,

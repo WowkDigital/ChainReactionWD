@@ -71,7 +71,7 @@ export default class Molecule extends Entity {
         }
 
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-        if (speed > CONSTANTS.HIGH_SPEED_THRESHOLD) {
+        if (speed > SETTINGS.instabilityThreshold) {
             this.highSpeedTimer += 1 * dt;
         } else {
             this.highSpeedTimer = 0;

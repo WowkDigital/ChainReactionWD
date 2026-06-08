@@ -55,7 +55,7 @@ export default class Electron extends Entity {
         const baseLifespan = 150 + Math.random() * 100;
         const lifespanFactor = Math.max(0.2, 1 - currentElectronCount / 200);
         
-        this.initialLifespan = baseLifespan * lifespanFactor;
+        this.initialLifespan = baseLifespan * lifespanFactor * SETTINGS.electronLifespanMultiplier;
         this.lifespan = this.initialLifespan;
         this.fadeInTimer = CONSTANTS.ELECTRON_FADE_IN_DURATION;
         this.initialFadeInTime = CONSTANTS.ELECTRON_FADE_IN_DURATION;

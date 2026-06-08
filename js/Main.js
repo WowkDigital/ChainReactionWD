@@ -47,6 +47,16 @@ const spawnChanceValue = document.getElementById('spawnChanceValue');
 const decayChanceSlider = document.getElementById('decayChanceSlider');
 const decayChanceValue = document.getElementById('decayChanceValue');
 
+// New Physics Sliders & Values
+const driftStrengthSlider = document.getElementById('driftStrengthSlider');
+const driftStrengthValue = document.getElementById('driftStrengthValue');
+const elasticitySlider = document.getElementById('elasticitySlider');
+const elasticityValue = document.getElementById('elasticityValue');
+const instabilityThresholdSlider = document.getElementById('instabilityThresholdSlider');
+const instabilityThresholdValue = document.getElementById('instabilityThresholdValue');
+const electronLifespanSlider = document.getElementById('electronLifespanSlider');
+const electronLifespanValue = document.getElementById('electronLifespanValue');
+
 // Config Selects
 const chartTimeWindowSelect = document.getElementById('chartTimeWindowSelect');
 
@@ -178,6 +188,10 @@ function synchronizeConfig() {
     SETTINGS.simulationSpeed = parseFloat(simSpeedSlider.value) / 10;
     SETTINGS.spawnChanceMultiplier = parseFloat(spawnChanceSlider.value) / 10;
     SETTINGS.decayChanceMultiplier = parseFloat(decayChanceSlider.value) / 10;
+    SETTINGS.driftStrengthMultiplier = parseFloat(driftStrengthSlider.value) / 10;
+    SETTINGS.elasticity = parseFloat(elasticitySlider.value) / 10;
+    SETTINGS.instabilityThreshold = parseFloat(instabilityThresholdSlider.value) / 10;
+    SETTINGS.electronLifespanMultiplier = parseFloat(electronLifespanSlider.value) / 10;
     SETTINGS.chartTimeWindow = parseInt(chartTimeWindowSelect.value, 10);
     
     // Sync visibility of containers directly from settings
@@ -256,6 +270,10 @@ function updateSliderLabels() {
     simSpeedValue.textContent = `${(simSpeedSlider.value / 10).toFixed(1)}x`;
     spawnChanceValue.textContent = `${(spawnChanceSlider.value / 10).toFixed(1)}x`;
     decayChanceValue.textContent = `${(decayChanceSlider.value / 10).toFixed(1)}x`;
+    driftStrengthValue.textContent = `${(driftStrengthSlider.value / 10).toFixed(1)}x`;
+    elasticityValue.textContent = `${(elasticitySlider.value / 10).toFixed(1)}x`;
+    instabilityThresholdValue.textContent = (instabilityThresholdSlider.value / 10).toFixed(1);
+    electronLifespanValue.textContent = `${(electronLifespanSlider.value / 10).toFixed(1)}x`;
 }
 
 /**
@@ -345,7 +363,8 @@ chartTimeWindowSelect.addEventListener('change', () => {
 // Real-time slider updates
 const allSliders = [
     numMoleculesSlider, colorCountSlider, miniParticleScaleSlider,
-    lerpFactorSlider, simSpeedSlider, spawnChanceSlider, decayChanceSlider
+    lerpFactorSlider, simSpeedSlider, spawnChanceSlider, decayChanceSlider,
+    driftStrengthSlider, elasticitySlider, instabilityThresholdSlider, electronLifespanSlider
 ];
 
 allSliders.forEach(slider => {
@@ -357,6 +376,10 @@ allSliders.forEach(slider => {
         SETTINGS.simulationSpeed = parseFloat(simSpeedSlider.value) / 10;
         SETTINGS.spawnChanceMultiplier = parseFloat(spawnChanceSlider.value) / 10;
         SETTINGS.decayChanceMultiplier = parseFloat(decayChanceSlider.value) / 10;
+        SETTINGS.driftStrengthMultiplier = parseFloat(driftStrengthSlider.value) / 10;
+        SETTINGS.elasticity = parseFloat(elasticitySlider.value) / 10;
+        SETTINGS.instabilityThreshold = parseFloat(instabilityThresholdSlider.value) / 10;
+        SETTINGS.electronLifespanMultiplier = parseFloat(electronLifespanSlider.value) / 10;
     });
 });
 
