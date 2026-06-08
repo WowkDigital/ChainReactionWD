@@ -1,0 +1,541 @@
+:root {
+    --bg-color: #080b10;
+    --surface-color: rgba(22, 27, 34, 0.75);
+    --surface-solid: #161B22;
+    --border-color: rgba(48, 54, 61, 0.65);
+    --border-glow: rgba(59, 130, 246, 0.2);
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    
+    --accent-blue: #3b82f6;
+    --accent-blue-hover: #1d4ed8;
+    --accent-blue-glow: rgba(59, 130, 246, 0.4);
+    --accent-yellow: #fbbf24;
+    
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+    
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Base Reset & Page Styles --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body { 
+    margin: 0; 
+    padding: 0; 
+    overflow: hidden; 
+    background-color: var(--bg-color); 
+    color: var(--text-primary);
+    font-family: var(--font-body); 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+canvas#simulationCanvas { 
+    display: block; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* --- Stats Top Bar --- */
+#stats-bar { 
+    position: absolute; 
+    top: 1.25rem; 
+    left: 50%; 
+    transform: translateX(-50%);
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    gap: 1.5rem; 
+    padding: 0.75rem 1.75rem; 
+    background: var(--surface-color); 
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    font-size: 0.85rem; 
+    z-index: 10; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: var(--transition-smooth);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-item .label { 
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-item .value { 
+    font-weight: 600; 
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    min-width: 3.5ch;
+    display: inline-block;
+    text-align: left;
+}
+
+.stat-divider {
+    height: 14px;
+    width: 1px;
+    background-color: var(--border-color);
+}
+
+/* --- Floating Widgets & Sidebars --- */
+.glass-panel {
+    background-color: var(--surface-color);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* --- Chart Widget --- */
+#chart-container {
+    position: absolute;
+    bottom: 140px; /* Sits comfortably above bottom bar */
+    left: 1.25rem;
+    width: 320px;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+    overflow: hidden;
+    transition: opacity var(--transition-smooth), transform var(--transition-smooth), visibility var(--transition-smooth);
+}
+
+#chart-container.hidden {
+    opacity: 0;
+    transform: translateY(10px);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.chart-header {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.chart-wrapper {
+    flex-grow: 1;
+    padding: 0.5rem;
+    position: relative;
+}
+
+/* --- Configuration Sidebar --- */
+#config-sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 360px;
+    max-width: 90vw;
+    height: 100%;
+    background-color: rgba(13, 17, 23, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-left: 1px solid var(--border-color);
+    z-index: 30;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+}
+
+#config-sidebar.open { 
+    transform: translateX(0); 
+}
+
+#config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+#config-header h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+#config-controls { 
+    padding: 1.5rem; 
+    display: flex; 
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Custom Scrollbar for Sidebar */
+#config-controls::-webkit-scrollbar {
+    width: 6px;
+}
+#config-controls::-webkit-scrollbar-track {
+    background: transparent;
+}
+#config-controls::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+#config-controls::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Form Controls --- */
+.control-group { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.5rem;
+}
+
+.control-group label { 
+    font-size: 0.8rem; 
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider-val {
+    color: var(--accent-blue);
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+/* Range Input styling */
+.control-group input[type="range"] { 
+    -webkit-appearance: none; 
+    appearance: none; 
+    width: 100%; 
+    height: 5px; 
+    background: rgba(255, 255, 255, 0.1); 
+    border-radius: 9999px; 
+    outline: none; 
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb { 
+    -webkit-appearance: none; 
+    appearance: none; 
+    width: 16px; 
+    height: 16px; 
+    background: var(--accent-blue); 
+    cursor: pointer; 
+    border-radius: 50%;
+    border: 2px solid var(--bg-color);
+    box-shadow: 0 0 10px var(--accent-blue-glow);
+    transition: background-color var(--transition-smooth), transform 0.1s ease;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--text-primary);
+    transform: scale(1.15);
+}
+
+.control-group input[type="range"]::-moz-range-thumb { 
+    width: 14px; 
+    height: 14px; 
+    background: var(--accent-blue); 
+    cursor: pointer; 
+    border-radius: 50%;
+    border: 2px solid var(--bg-color);
+    box-shadow: 0 0 10px var(--accent-blue-glow);
+}
+
+/* Select dropdown styling */
+.select-wrapper {
+    position: relative;
+}
+.control-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+.control-group select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px var(--accent-blue-glow);
+}
+.select-wrapper::after {
+    content: "";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 5px solid var(--text-secondary);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    pointer-events: none;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 0.5rem 0;
+}
+
+/* Checkbox Toggle Container */
+.checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Custom Checkbox Design */
+.checkbox-group { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    color: var(--text-primary); 
+    font-size: 0.875rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    user-select: none;
+}
+
+.checkbox-group:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-color);
+}
+
+.checkbox-group input { 
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.custom-checkbox {
+    height: 18px;
+    width: 18px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    transition: var(--transition-smooth);
+}
+
+.checkbox-group:hover .custom-checkbox {
+    border-color: var(--accent-blue);
+}
+
+.checkbox-group input:checked ~ .custom-checkbox {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px var(--accent-blue-glow);
+}
+
+.custom-checkbox::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-group input:checked ~ .custom-checkbox::after {
+    display: block;
+}
+
+.checkbox-label {
+    font-weight: 500;
+}
+
+/* --- Buttons --- */
+.btn-primary { 
+    padding: 0.85rem 1rem; 
+    font-size: 0.875rem;
+    font-weight: 600;
+    background-color: var(--accent-blue); 
+    color: white; 
+    border: none; 
+    border-radius: 0.5rem; 
+    cursor: pointer; 
+    transition: var(--transition-smooth); 
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover { 
+    background-color: var(--accent-blue-hover); 
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+/* Toggle Control Buttons */
+.toggle-button {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    z-index: 40;
+    background: var(--surface-color);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-button:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 12px var(--accent-blue-glow);
+}
+
+.toggle-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.toggle-button.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* --- Unique Combinations Drawer (Bottom) --- */
+#unique-combinations-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    background-color: rgba(8, 11, 16, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    z-index: 15;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+}
+
+#unique-combinations-bar::-webkit-scrollbar {
+    height: 4px;
+}
+#unique-combinations-bar::-webkit-scrollbar-track {
+    background: transparent;
+}
+#unique-combinations-bar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+}
+#unique-combinations-bar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.unique-particle-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.unique-particle-container {
+    width: 70px;
+    height: 70px;
+    border-radius: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: var(--transition-smooth);
+}
+
+.unique-particle-container:hover {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.unique-particle-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.discovery-number {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    font-weight: 600;
+}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Chain Reaction - Interactive Physics Simulation</title>
+    <meta name="description" content="An interactive, high-performance quantum particle and chain reaction simulation built with HTML5 Canvas, featuring custom physics, dynamic speed scaling, and molecular combinations.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+</head>
+<body>
+    <!-- Background Canvas for the Quantum Simulation -->
+    <canvas id="simulationCanvas"></canvas>
+
+    <!-- Top floating dashboard for real-time statistics -->
+    <header id="stats-bar" role="banner">
+        <div class="stat-item">
+            <span class="label">Time:</span>
+            <span id="simTimeDisplay" class="value">00:00</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="label">Molecules:</span>
+            <span id="moleculeCountDisplay" class="value">000</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="label">Electrons:</span>
+            <span id="electronCountDisplay" class="value">000</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="label">Combinations:</span>
+            <span id="uniqueCombinationsDisplay" class="value">000</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="label">Slowdown:</span>
+            <span id="timeScaleDisplay" class="value">0%</span>
+        </div>
+    </header>
+
+    <!-- Floating configuration panel toggle button -->
+    <button id="config-toggle" class="toggle-button" aria-label="Open Settings" aria-expanded="false" aria-controls="config-sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.424.35.534.954.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    </button>
+
+    <!-- Floating rate of discovery graph widget -->
+    <section id="chart-container" class="glass-panel" aria-label="Discovery Analytics">
+        <div class="chart-header">
+            <h3>Discovery Rate</h3>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="discoveryChart"></canvas>
+        </div>
+    </section>
+
+    <!-- Slide-out Configuration Sidebar -->
+    <aside id="config-sidebar" role="complementary" aria-label="Simulation Settings">
+        <div id="config-header">
+            <h2>Simulation Setup</h2>
+            <button id="config-close" class="toggle-button" aria-label="Close Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div id="config-controls">
+            <!-- Numerical Parameters -->
+            <div class="control-group">
+                <label for="numMoleculesSlider">Initial Molecules: <span id="numMoleculesValue" class="slider-val">30</span></label>
+                <input type="range" id="numMoleculesSlider" min="10" max="100" value="30">
+            </div>
+            
+            <div class="control-group">
+                <label for="colorCountSlider">Color Palette Size: <span id="colorCountValue" class="slider-val">14</span></label>
+                <input type="range" id="colorCountSlider" min="1" max="14" value="14">
+            </div>
+            
+            <div class="control-group">
+                <label for="miniParticleScaleSlider">Discovery Item Scale: <span id="miniParticleScaleValue" class="slider-val">1.0x</span></label>
+                <input type="range" id="miniParticleScaleSlider" min="5" max="20" value="10">
+            </div>
+            
+            <div class="control-group">
+                <label for="lerpFactorSlider">Time-scale Transition Smoothness: <span id="lerpFactorValue" class="slider-val">0.050</span></label>
+                <input type="range" id="lerpFactorSlider" min="1" max="200" value="50">
+            </div>
+            
+            <div class="control-group">
+                <label for="simSpeedSlider">Simulation Speed: <span id="simSpeedValue" class="slider-val">1.0x</span></label>
+                <input type="range" id="simSpeedSlider" min="1" max="50" value="10">
+            </div>
+            
+            <div class="control-group">
+                <label for="spawnChanceSlider">Spontaneous Generation Rate: <span id="spawnChanceValue" class="slider-val">1.0x</span></label>
+                <input type="range" id="spawnChanceSlider" min="0" max="100" value="10">
+            </div>
+            
+            <div class="control-group">
+                <label for="decayChanceSlider">Spontaneous Decay Rate: <span id="decayChanceValue" class="slider-val">1.0x</span></label>
+                <input type="range" id="decayChanceSlider" min="0" max="100" value="10">
+            </div>
+            
+            <hr class="divider">
+
+            <!-- Dropdown Options -->
+            <div class="control-group">
+                <label for="chartTimeWindowSelect">Chart Time Window (Moving Avg)</label>
+                <div class="select-wrapper">
+                    <select id="chartTimeWindowSelect">
+                        <option value="10000">10 Seconds</option>
+                        <option value="30000" selected>30 Seconds</option>
+                        <option value="60000">1 Minute</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Toggles / Checkboxes -->
+            <div class="checkbox-container">
+                <label class="checkbox-group">
+                    <input type="checkbox" id="showChartCheck" checked>
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-label">Show Discovery Graph</span>
+                </label>
+                
+                <label class="checkbox-group">
+                    <input type="checkbox" id="spontaneousGenerationCheck">
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-label">Spontaneous Generation</span>
+                </label>
+                
+                <label class="checkbox-group">
+                    <input type="checkbox" id="spontaneousDecayCheck">
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-label">Spontaneous Decay</span>
+                </label>
+                
+                <label class="checkbox-group">
+                    <input type="checkbox" id="addParticleCheck">
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-label">Spawn Molecule on Click</span>
+                </label>
+                
+                <label class="checkbox-group">
+                    <input type="checkbox" id="noBoundingBoxCheck">
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-label">Screen Wrap (No Boundaries)</span>
+                </label>
+            </div>
+            
+            <button id="resetButton" class="btn-primary">Apply &amp; Reset Simulation</button>
+        </div>
+    </aside>
+
+    <!-- Bottom Drawer for Log of Discovered Unique Combinations -->
+    <footer id="unique-combinations-bar" role="contentinfo" aria-label="Discovered Molecule Combinations">
+        <!-- Discovered unique combinations will be injected here dynamically -->
+    </footer>
+
+    <!-- Main script entry point -->
+    <script type="module" src="js/Main.js"></script>
+</body>
+</html>
