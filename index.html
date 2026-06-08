@@ -18,56 +18,20 @@
     <!-- Background Canvas for the Quantum Simulation -->
     <canvas id="simulationCanvas"></canvas>
 
-    <!-- Top floating dashboard for real-time statistics (Hidden by default) -->
-    <header id="stats-bar" class="hidden" role="banner">
-        <div class="stat-item" title="Elapsed Time">
-            <i data-lucide="clock" class="stat-icon"></i>
-            <span class="label">Time:</span>
-            <span id="simTimeDisplay" class="value">00:00</span>
+    <!-- Top Floating Unified Control & Stats Dashboard -->
+    <header id="top-dashboard" class="glass-panel" role="banner">
+        <!-- Simulation Controls -->
+        <div class="control-group-dock">
+            <button id="btn-play-pause" class="dock-btn active" aria-label="Pause Simulation" title="Play/Pause Simulation">
+                <i data-lucide="pause" class="icon icon-pause"></i>
+                <i data-lucide="play" class="icon icon-play hidden"></i>
+            </button>
+            <button id="btn-reset" class="dock-btn alert-btn" title="Reset Simulation">
+                <i data-lucide="rotate-ccw" class="icon"></i>
+            </button>
         </div>
-        
-        <div class="stat-divider"></div>
-        
-        <div class="stat-item" title="Active Molecules">
-            <i data-lucide="orbit" class="stat-icon"></i>
-            <span class="label">Molecules:</span>
-            <span id="moleculeCountDisplay" class="value">000</span>
-        </div>
-        
-        <div class="stat-divider"></div>
-        
-        <div class="stat-item" title="Free Electrons (Energy)">
-            <i data-lucide="zap" class="stat-icon glow-yellow"></i>
-            <span class="label">Electrons:</span>
-            <span id="electronCountDisplay" class="value">000</span>
-        </div>
-        
-        <div class="stat-divider"></div>
-        
-        <div class="stat-item" title="Discovered Unique Combinations">
-            <i data-lucide="flask-conical" class="stat-icon"></i>
-            <span class="label">Combos:</span>
-            <span id="uniqueCombinationsDisplay" class="value">000</span>
-        </div>
-        
-        <div class="stat-divider"></div>
-        
-        <div class="stat-item" title="Dynamic Time Dilated Slowdown">
-            <i data-lucide="gauge" class="stat-icon"></i>
-            <span class="label">Slowdown:</span>
-            <span id="timeScaleDisplay" class="value">0%</span>
-        </div>
-    </header>
 
-    <!-- Center-Bottom Command Dock for quick settings and interactions -->
-    <nav id="control-dock" class="glass-panel" role="navigation" aria-label="Simulation Controls">
-        <!-- Play / Pause -->
-        <button id="btn-play-pause" class="dock-btn active" aria-label="Pause Simulation" title="Play/Pause Simulation">
-            <i data-lucide="pause" class="icon icon-pause"></i>
-            <i data-lucide="play" class="icon icon-play hidden"></i>
-        </button>
-
-        <div class="dock-divider"></div>
+        <div class="vertical-divider"></div>
 
         <!-- Mouse Interaction Mode (Segmented Toggle) -->
         <div class="segmented-control" role="group" aria-label="Mouse Pointer Mode">
@@ -79,54 +43,67 @@
             </button>
         </div>
 
-        <div class="dock-divider"></div>
+        <div class="vertical-divider"></div>
 
-        <!-- Spontaneous Generation Toggle -->
-        <button id="btn-spontaneous-gen" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Generation">
-            <i data-lucide="sparkles" class="icon"></i>
-        </button>
+        <!-- Simulation Rules -->
+        <div class="control-group-dock">
+            <button id="btn-spontaneous-gen" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Generation">
+                <i data-lucide="sparkles" class="icon"></i>
+            </button>
+            <button id="btn-spontaneous-decay" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Decay">
+                <i data-lucide="split" class="icon"></i>
+            </button>
+            <button id="btn-screen-wrap" class="dock-btn" aria-pressed="false" title="Toggle Screen Wrap / Boundaries">
+                <i data-lucide="infinity" class="icon"></i>
+            </button>
+        </div>
 
-        <!-- Spontaneous Decay Toggle -->
-        <button id="btn-spontaneous-decay" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Decay">
-            <i data-lucide="split" class="icon"></i>
-        </button>
+        <div class="vertical-divider"></div>
 
-        <!-- Screen Wrapping Toggle -->
-        <button id="btn-screen-wrap" class="dock-btn" aria-pressed="false" title="Toggle Screen Wrap / Boundaries">
-            <i data-lucide="infinity" class="icon"></i>
-        </button>
+        <!-- Real-Time Telemetry Stats -->
+        <div id="stats-container">
+            <div class="stat-bubble" title="Elapsed Time">
+                <i data-lucide="clock" class="stat-icon"></i>
+                <span id="simTimeDisplay" class="value">00:00</span>
+            </div>
+            
+            <div class="stat-bubble" title="Active Molecules">
+                <i data-lucide="orbit" class="stat-icon"></i>
+                <span id="moleculeCountDisplay" class="value">000</span>
+            </div>
+            
+            <div class="stat-bubble" title="Free Electrons (Energy)">
+                <i data-lucide="zap" class="stat-icon glow-yellow"></i>
+                <span id="electronCountDisplay" class="value">000</span>
+            </div>
+            
+            <div class="stat-bubble" title="Discovered Unique Combinations">
+                <i data-lucide="flask-conical" class="stat-icon"></i>
+                <span id="uniqueCombinationsDisplay" class="value">000</span>
+            </div>
+            
+            <div class="stat-bubble" title="Dynamic Time Dilated Slowdown">
+                <i data-lucide="gauge" class="stat-icon"></i>
+                <span id="timeScaleDisplay" class="value">0%</span>
+            </div>
+        </div>
 
-        <div class="dock-divider"></div>
+        <div class="vertical-divider"></div>
 
-        <!-- Toggle Stats Dashboard (Eye Icon) -->
-        <button id="btn-toggle-stats" class="dock-btn" aria-pressed="false" title="Toggle Stats Dashboard">
-            <i data-lucide="eye" class="icon"></i>
-        </button>
-
-        <!-- Show Chart Toggle (Activity Icon) -->
-        <button id="btn-toggle-chart" class="dock-btn" aria-pressed="false" title="Toggle Discovery Chart">
-            <i data-lucide="activity" class="icon"></i>
-        </button>
-
-        <!-- Toggle Discoveries Log (History Icon) -->
-        <button id="btn-toggle-discoveries" class="dock-btn" aria-pressed="false" title="Toggle Discoveries Log">
-            <i data-lucide="history" class="icon"></i>
-        </button>
-
-        <div class="dock-divider"></div>
-
-        <!-- Reset Button -->
-        <button id="btn-reset" class="dock-btn alert-btn" title="Reset Simulation">
-            <i data-lucide="rotate-ccw" class="icon"></i>
-        </button>
-
-        <div class="dock-divider"></div>
-
-        <!-- Open Settings -->
-        <button id="btn-settings-toggle" class="dock-btn" title="Open Custom Quantities Panel">
-            <i data-lucide="sliders" class="icon"></i>
-        </button>
-    </nav>
+        <!-- UI Widget Toggles & Sidebar settings trigger -->
+        <div class="control-group-dock">
+            <button id="btn-toggle-chart" class="dock-btn" aria-pressed="false" title="Toggle Discovery Chart">
+                <i data-lucide="activity" class="icon"></i>
+            </button>
+            <button id="btn-toggle-discoveries" class="dock-btn" aria-pressed="false" title="Toggle Discoveries Log">
+                <i data-lucide="history" class="icon"></i>
+            </button>
+            <div class="dock-divider"></div>
+            <button id="btn-settings-toggle" class="dock-btn" title="Open Custom Quantities Panel">
+                <i data-lucide="sliders" class="icon"></i>
+            </button>
+        </div>
+    </header>
 
     <!-- Floating rate of discovery graph widget (Hidden by default) -->
     <section id="chart-container" class="glass-panel hidden" aria-label="Discovery Analytics">

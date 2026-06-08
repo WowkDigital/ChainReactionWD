@@ -69,7 +69,6 @@ export const SETTINGS = {
     
     // Checkboxes / Modes
     showChart: false,
-    showStats: false,
     showDiscoveries: false,
     isPaused: false,
     spontaneousGeneration: false,

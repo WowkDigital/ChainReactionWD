@@ -50,85 +50,17 @@ canvas#simulationCanvas {
     z-index: 1;
 }
 
-/* --- Stats Top Bar --- */
-#stats-bar { 
-    position: absolute; 
-    top: 1.25rem; 
-    left: 50%; 
-    transform: translateX(-50%);
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    gap: 1.25rem; 
-    padding: 0.6rem 1.5rem; 
-    background: var(--surface-color); 
-    backdrop-filter: blur(14px); 
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--border-color);
-    border-radius: 9999px;
-    font-size: 0.85rem; 
-    z-index: 10; 
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    transition: var(--transition-smooth);
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.stat-icon {
-    width: 1rem;
-    height: 1rem;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-    transition: var(--transition-smooth);
-}
-
-.stat-item:hover .stat-icon {
-    transform: scale(1.15);
-    color: var(--text-primary);
-}
-
-.stat-icon.glow-yellow {
-    color: var(--accent-yellow);
-    filter: drop-shadow(0 0 4px var(--accent-yellow-glow));
-}
-
-.stat-item .label { 
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.stat-item .value { 
-    font-weight: 600; 
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    min-width: 3ch;
-    display: inline-block;
-    text-align: left;
-}
-
-.stat-divider {
-    height: 12px;
-    width: 1px;
-    background-color: var(--border-color);
-}
-
-/* --- Floating Control Dock (Bottom Center) --- */
-#control-dock {
+/* --- Top Floating Unified Dashboard Bar --- */
+#top-dashboard {
     position: absolute;
-    bottom: 135px; /* Directly above bottom combinations drawer */
+    top: 1.25rem;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    height: 52px;
+    gap: 0.75rem;
+    padding: 0.4rem 1.25rem;
+    height: 54px;
     background: var(--surface-color);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -139,6 +71,70 @@ canvas#simulationCanvas {
     transition: var(--transition-smooth);
 }
 
+.control-group-dock {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.vertical-divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--border-color);
+}
+
+/* --- Stat Bubbles (Telemetry) --- */
+#stats-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-bubble {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.75rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 9999px;
+    height: 36px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: var(--transition-smooth);
+}
+
+.stat-bubble:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.stat-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: var(--transition-smooth);
+}
+
+.stat-bubble:hover .stat-icon {
+    transform: scale(1.1);
+    color: var(--text-primary);
+}
+
+.stat-icon.glow-yellow {
+    color: var(--accent-yellow);
+    filter: drop-shadow(0 0 3px var(--accent-yellow-glow));
+}
+
+.stat-bubble .value {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    min-width: 3ch;
+}
+
+/* --- Dock Buttons --- */
 .dock-btn {
     width: 36px;
     height: 36px;
@@ -155,9 +151,13 @@ canvas#simulationCanvas {
     position: relative;
 }
 
-.dock-btn svg {
-    width: 1.25rem;
-    height: 1.25rem;
+.dock-btn svg,
+.dock-btn i {
+    width: 1.2rem;
+    height: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dock-btn:hover {
@@ -208,6 +208,12 @@ canvas#simulationCanvas {
     box-shadow: 0 0 10px var(--accent-blue-glow);
 }
 
+#btn-toggle-discoveries.active {
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+    box-shadow: 0 0 10px var(--accent-green-glow);
+}
+
 /* Alert reset button hover */
 .dock-btn.alert-btn:hover {
     color: var(--accent-red);
@@ -217,18 +223,20 @@ canvas#simulationCanvas {
 }
 
 /* Settings rotation effect on hover */
+#btn-settings-toggle:hover i,
 #btn-settings-toggle:hover svg {
     transform: rotate(45deg);
 }
+#btn-settings-toggle i,
 #btn-settings-toggle svg {
     transition: transform 0.4s ease;
 }
 
 .dock-divider {
     width: 1px;
-    height: 20px;
+    height: 16px;
     background-color: var(--border-color);
-    margin: 0 0.25rem;
+    margin: 0 0.15rem;
 }
 
 /* --- Segmented Control (Pill Switch) --- */
@@ -242,8 +250,8 @@ canvas#simulationCanvas {
 
 .segmented-control .dock-btn {
     border-radius: 9999px;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
 }
 
 .segmented-control .dock-btn.active {
@@ -271,7 +279,7 @@ canvas#simulationCanvas {
 /* --- Chart Widget --- */
 #chart-container {
     position: absolute;
-    bottom: 200px; /* Elevated to sit clearly above bottom controls */
+    bottom: 140px; /* Sitting above bottom combinations log */
     left: 1.25rem;
     width: 320px;
     height: 180px;
@@ -522,9 +530,13 @@ canvas#simulationCanvas {
     box-shadow: 0 0 12px var(--accent-blue-glow);
 }
 
+.toggle-button i,
 .toggle-button svg {
     width: 1.15rem;
     height: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* --- Unique Combinations Drawer (Bottom) --- */

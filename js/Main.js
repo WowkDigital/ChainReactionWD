@@ -5,7 +5,7 @@ import Simulation from './Simulation.js';
 
 // DOM Elements
 const canvas = document.getElementById('simulationCanvas');
-const statsBar = document.getElementById('stats-bar');
+const topDashboard = document.getElementById('top-dashboard');
 const uniqueCombinationsBar = document.getElementById('unique-combinations-bar');
 const chartContainer = document.getElementById('chart-container');
 const configSidebar = document.getElementById('config-sidebar');
@@ -19,7 +19,6 @@ const btnModeSpawn = document.getElementById('btn-mode-spawn');
 const btnSpontaneousGen = document.getElementById('btn-spontaneous-gen');
 const btnSpontaneousDecay = document.getElementById('btn-spontaneous-decay');
 const btnScreenWrap = document.getElementById('btn-screen-wrap');
-const btnToggleStats = document.getElementById('btn-toggle-stats');
 const btnToggleChart = document.getElementById('btn-toggle-chart');
 const btnToggleDiscoveries = document.getElementById('btn-toggle-discoveries');
 const btnReset = document.getElementById('btn-reset');
@@ -65,9 +64,8 @@ function updateBounds() {
     SETTINGS.width = canvas.width;
     SETTINGS.height = canvas.height;
 
-    // Shift boundary depending on whether panels are visible
-    const statsVisible = !statsBar.classList.contains('hidden');
-    SETTINGS.topBoundary = statsVisible ? (statsBar.offsetHeight + 10) : 10;
+    // Boundary top accounts for the unified floating top panel height
+    SETTINGS.topBoundary = topDashboard.offsetHeight + 20;
     
     const discoveriesVisible = !uniqueCombinationsBar.classList.contains('hidden');
     SETTINGS.bottomBoundary = discoveriesVisible ? (uniqueCombinationsBar.offsetTop - 10) : (canvas.height - 10);
@@ -183,7 +181,6 @@ function synchronizeConfig() {
     SETTINGS.chartTimeWindow = parseInt(chartTimeWindowSelect.value, 10);
     
     // Sync visibility of containers directly from settings
-    statsBar.classList.toggle('hidden', !SETTINGS.showStats);
     chartContainer.classList.toggle('hidden', !SETTINGS.showChart);
     uniqueCombinationsBar.classList.toggle('hidden', !SETTINGS.showDiscoveries);
 }
@@ -234,17 +231,12 @@ function syncDockButtonsFromSettings() {
     btnScreenWrap.classList.toggle('active', SETTINGS.noBoundingBox);
     btnScreenWrap.setAttribute('aria-pressed', SETTINGS.noBoundingBox ? 'true' : 'false');
 
-    // 6. Show Stats
-    btnToggleStats.classList.toggle('active', SETTINGS.showStats);
-    btnToggleStats.setAttribute('aria-pressed', SETTINGS.showStats ? 'true' : 'false');
-    statsBar.classList.toggle('hidden', !SETTINGS.showStats);
-
-    // 7. Show Chart
+    // 6. Show Chart
     btnToggleChart.classList.toggle('active', SETTINGS.showChart);
     btnToggleChart.setAttribute('aria-pressed', SETTINGS.showChart ? 'true' : 'false');
     chartContainer.classList.toggle('hidden', !SETTINGS.showChart);
 
-    // 8. Show Discoveries
+    // 7. Show Discoveries
     btnToggleDiscoveries.classList.toggle('active', SETTINGS.showDiscoveries);
     btnToggleDiscoveries.setAttribute('aria-pressed', SETTINGS.showDiscoveries ? 'true' : 'false');
     uniqueCombinationsBar.classList.toggle('hidden', !SETTINGS.showDiscoveries);
@@ -316,11 +308,6 @@ btnSpontaneousDecay.addEventListener('click', () => {
 
 btnScreenWrap.addEventListener('click', () => {
     SETTINGS.noBoundingBox = !SETTINGS.noBoundingBox;
-    syncDockButtonsFromSettings();
-});
-
-btnToggleStats.addEventListener('click', () => {
-    SETTINGS.showStats = !SETTINGS.showStats;
     syncDockButtonsFromSettings();
 });
 
