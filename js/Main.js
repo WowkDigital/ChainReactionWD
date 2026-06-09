@@ -25,6 +25,7 @@ const btnReset = document.getElementById('btn-reset');
 const btnSettingsToggle = document.getElementById('btn-settings-toggle');
 const btnAddTen = document.getElementById('btn-add-ten');
 const inputAddCount = document.getElementById('input-add-count');
+const btnAttraction = document.getElementById('btn-attraction');
 
 // Stats Displays
 const simTimeDisplay = document.getElementById('simTimeDisplay');
@@ -63,6 +64,7 @@ const electronLifespanValue = document.getElementById('electronLifespanValue');
 // Config Selects
 const chartTimeWindowSelect = document.getElementById('chartTimeWindowSelect');
 const gpuOptimizationSelect = document.getElementById('gpuOptimizationSelect');
+const attractionSelect = document.getElementById('attractionSelect');
 
 // Managers
 const chartManager = new ChartManager('discoveryChart');
@@ -200,6 +202,7 @@ function synchronizeConfig() {
     SETTINGS.electronLifespanMultiplier = parseFloat(electronLifespanSlider.value) / 10;
     SETTINGS.chartTimeWindow = parseInt(chartTimeWindowSelect.value, 10);
     SETTINGS.gpuOptimization = gpuOptimizationSelect.value === 'enabled';
+    SETTINGS.enableAttraction = attractionSelect.value === 'enabled';
     
     // Toggle body class for GPU optimization (backdrop-filter disable)
     document.body.classList.toggle('gpu-optimized', SETTINGS.gpuOptimization);
@@ -254,6 +257,13 @@ function syncDockButtonsFromSettings() {
     // 5. Screen Wrap
     btnScreenWrap.classList.toggle('active', SETTINGS.noBoundingBox);
     btnScreenWrap.setAttribute('aria-pressed', SETTINGS.noBoundingBox ? 'true' : 'false');
+
+    // 5b. Small Particle Attraction
+    btnAttraction.classList.toggle('active', SETTINGS.enableAttraction);
+    btnAttraction.setAttribute('aria-pressed', SETTINGS.enableAttraction ? 'true' : 'false');
+    if (attractionSelect) {
+        attractionSelect.value = SETTINGS.enableAttraction ? 'enabled' : 'disabled';
+    }
 
     // 6. Show Chart
     btnToggleChart.classList.toggle('active', SETTINGS.showChart);
@@ -345,6 +355,12 @@ btnScreenWrap.addEventListener('click', () => {
     syncDockButtonsFromSettings();
 });
 
+btnAttraction.addEventListener('click', () => {
+    SETTINGS.enableAttraction = !SETTINGS.enableAttraction;
+    if (simulation) simulation.needsRedraw = true;
+    syncDockButtonsFromSettings();
+});
+
 btnToggleChart.addEventListener('click', () => {
     SETTINGS.showChart = !SETTINGS.showChart;
     if (simulation) simulation.needsRedraw = true;
@@ -382,6 +398,12 @@ gpuOptimizationSelect.addEventListener('change', () => {
     SETTINGS.gpuOptimization = gpuOptimizationSelect.value === 'enabled';
     document.body.classList.toggle('gpu-optimized', SETTINGS.gpuOptimization);
     if (simulation) simulation.needsRedraw = true;
+});
+
+attractionSelect.addEventListener('change', () => {
+    SETTINGS.enableAttraction = attractionSelect.value === 'enabled';
+    if (simulation) simulation.needsRedraw = true;
+    syncDockButtonsFromSettings();
 });
 
 // Real-time slider updates

@@ -81,6 +81,7 @@ export const SETTINGS = {
     addParticleOnClick: false,
     noBoundingBox: false,
     gpuOptimization: true, // GPU power saving (disables backdrop-filter blur)
+    enableAttraction: false,
     
     // Chart Time Window
     chartTimeWindow: 30000, // ms

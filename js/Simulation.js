@@ -159,6 +159,54 @@ export default class Simulation {
     }
 
     /**
+     * Applies gentle attraction between small molecules (size <= 4)
+     */
+    applyMoleculeAttraction() {
+        if (!SETTINGS.enableAttraction) return;
+
+        const maxRange = 150;
+        for (let i = 0; i < this.molecules.length; i++) {
+            const m1 = this.molecules[i];
+            if (m1.size > 4 || m1.markedForRemoval) continue;
+
+            for (let j = i + 1; j < this.molecules.length; j++) {
+                const m2 = this.molecules[j];
+                if (m2.size > 4 || m2.markedForRemoval) continue;
+
+                // Sweep-and-Prune: since molecules are sorted by X, if m2.x is further than maxRange,
+                // no subsequent molecules in the sorted list can be within range.
+                if (m2.x - m1.x > maxRange) {
+                    break;
+                }
+
+                const dx = m2.x - m1.x;
+                const dy = m2.y - m1.y;
+                const minDist = m1.radius + m2.radius;
+
+                // Quick AABB Y-axis check
+                if (Math.abs(dy) >= maxRange) continue;
+
+                const distSq = dx * dx + dy * dy;
+                if (distSq < maxRange * maxRange && distSq > minDist * minDist) {
+                    const dist = Math.sqrt(distSq);
+                    
+                    // Gentle force: stronger when closer, fades out at maxRange
+                    const forceStrength = 0.015;
+                    const force = (1 - dist / maxRange) * forceStrength * SETTINGS.effectiveTimeScale;
+                    
+                    const forceX = (dx / dist) * force;
+                    const forceY = (dy / dist) * force;
+
+                    m1.vx += forceX;
+                    m1.vy += forceY;
+                    m2.vx -= forceX;
+                    m2.vy -= forceY;
+                }
+            }
+        }
+    }
+
+    /**
      * Resolves molecular collisions: triggers high-energy combination, or executes elastic bounces
      */
     checkMoleculeCollisions() {
@@ -399,6 +447,7 @@ export default class Simulation {
             // Sort molecules along the X-axis to enable Sweep-and-Prune collision detection
             this.molecules.sort((a, b) => a.x - b.x);
 
+            this.applyMoleculeAttraction();
             this.checkElectronCollisions();
             this.checkMoleculeCollisions();
             this.handleSpontaneousEvents();

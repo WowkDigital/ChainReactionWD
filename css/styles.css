@@ -204,6 +204,12 @@ canvas#simulationCanvas {
     box-shadow: 0 0 10px var(--accent-yellow-glow);
 }
 
+#btn-attraction.active {
+    color: #f43f5e; /* Rose magnet attraction active */
+    border-color: #f43f5e;
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.45);
+}
+
 #btn-toggle-chart.active {
     color: var(--accent-blue);
     border-color: var(--accent-blue);

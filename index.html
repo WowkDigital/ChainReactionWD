@@ -60,6 +60,9 @@
             <button id="btn-screen-wrap" class="dock-btn" aria-pressed="false" title="Toggle Screen Wrap / Boundaries">
                 <i data-lucide="infinity" class="icon"></i>
             </button>
+            <button id="btn-attraction" class="dock-btn" aria-pressed="false" title="Toggle Small Particle Attraction (Magnetism)">
+                <i data-lucide="magnet" class="icon"></i>
+            </button>
         </div>
 
         <div class="vertical-divider"></div>
@@ -210,6 +213,16 @@
                         <option value="10000">10 Seconds</option>
                         <option value="30000" selected>30 Seconds</option>
                         <option value="60000">1 Minute</option>
+                    </select>
+                </div>
+            </div>
+
+             <div class="control-group" title="Small Particle Attraction: Enables a gentle attractive force between small molecules (4 atoms or fewer) to encourage combination.">
+                <label for="attractionSelect">Small Particle Attraction</label>
+                <div class="select-wrapper">
+                    <select id="attractionSelect">
+                        <option value="disabled" selected>Disabled</option>
+                        <option value="enabled">Enabled (Gentle Pull)</option>
                     </select>
                 </div>
             </div>
