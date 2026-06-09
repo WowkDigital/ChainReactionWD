@@ -241,6 +241,43 @@ canvas#simulationCanvas {
     margin: 0 0.15rem;
 }
 
+.dock-input {
+    width: 52px;
+    height: 32px;
+    border-radius: 9999px;
+    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: var(--transition-smooth);
+    padding: 0 0.25rem;
+}
+
+.dock-input:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dock-input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue-glow);
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Hide HTML5 number spinners for a cleaner UI */
+.dock-input::-webkit-outer-spin-button,
+.dock-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.dock-input[type=number] {
+    -moz-appearance: textfield;
+}
+
 /* --- Segmented Control (Pill Switch) --- */
 .segmented-control {
     display: flex;

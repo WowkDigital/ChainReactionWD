@@ -29,9 +29,10 @@
             <button id="btn-reset" class="dock-btn alert-btn" title="Reset Simulation">
                 <i data-lucide="rotate-ccw" class="icon"></i>
             </button>
-            <button id="btn-add-ten" class="dock-btn" title="Spawn 10 Random Molecules">
+            <button id="btn-add-ten" class="dock-btn" title="Spawn Random Molecules">
                 <i data-lucide="plus-circle" class="icon"></i>
             </button>
+            <input type="number" id="input-add-count" class="dock-input" value="10" min="1" max="999" title="Number of molecules to spawn">
         </div>
 
         <div class="vertical-divider"></div>
@@ -50,10 +51,10 @@
 
         <!-- Simulation Rules -->
         <div class="control-group-dock">
-            <button id="btn-spontaneous-gen" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Generation">
+            <button id="btn-spontaneous-gen" class="dock-btn" aria-pressed="true" title="Toggle Spontaneous Generation">
                 <i data-lucide="sparkles" class="icon"></i>
             </button>
-            <button id="btn-spontaneous-decay" class="dock-btn" aria-pressed="false" title="Toggle Spontaneous Decay">
+            <button id="btn-spontaneous-decay" class="dock-btn" aria-pressed="true" title="Toggle Spontaneous Decay">
                 <i data-lucide="split" class="icon"></i>
             </button>
             <button id="btn-screen-wrap" class="dock-btn" aria-pressed="false" title="Toggle Screen Wrap / Boundaries">

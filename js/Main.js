@@ -24,6 +24,7 @@ const btnToggleDiscoveries = document.getElementById('btn-toggle-discoveries');
 const btnReset = document.getElementById('btn-reset');
 const btnSettingsToggle = document.getElementById('btn-settings-toggle');
 const btnAddTen = document.getElementById('btn-add-ten');
+const inputAddCount = document.getElementById('input-add-count');
 
 // Stats Displays
 const simTimeDisplay = document.getElementById('simTimeDisplay');
@@ -413,9 +414,22 @@ colorCountSelect.addEventListener('change', () => {
     if (simulation) simulation.needsRedraw = true;
 });
 
+// Dynamic title update for the spawn button based on the custom count input
+function updateAddButtonTitle() {
+    const val = inputAddCount.value || 10;
+    btnAddTen.setAttribute('title', `Spawn ${val} Random Molecules`);
+}
+
+inputAddCount.addEventListener('input', updateAddButtonTitle);
+updateAddButtonTitle();
+
 btnAddTen.addEventListener('click', () => {
     if (simulation) {
-        simulation.spawnMolecules(10);
+        let count = parseInt(inputAddCount.value, 10);
+        if (isNaN(count) || count < 1) {
+            count = 1;
+        }
+        simulation.spawnMolecules(count);
     }
 });
 

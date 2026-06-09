@@ -76,8 +76,8 @@ export const SETTINGS = {
     showChart: false,
     showDiscoveries: false,
     isPaused: false,
-    spontaneousGeneration: false,
-    spontaneousDecay: false,
+    spontaneousGeneration: true,
+    spontaneousDecay: true,
     addParticleOnClick: false,
     noBoundingBox: false,
     gpuOptimization: true, // GPU power saving (disables backdrop-filter blur)
