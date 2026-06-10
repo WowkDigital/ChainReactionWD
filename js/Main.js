@@ -2,6 +2,7 @@ import { SETTINGS } from './Config.js';
 import { padNumber } from './Utils.js';
 import ChartManager from './ChartManager.js';
 import Simulation from './Simulation.js';
+import { soundManager } from './SoundManager.js';
 
 // DOM Elements
 const canvas = document.getElementById('simulationCanvas');
@@ -21,6 +22,7 @@ const btnSpontaneousDecay = document.getElementById('btn-spontaneous-decay');
 const btnScreenWrap = document.getElementById('btn-screen-wrap');
 const btnToggleChart = document.getElementById('btn-toggle-chart');
 const btnToggleDiscoveries = document.getElementById('btn-toggle-discoveries');
+const btnToggleSound = document.getElementById('btn-toggle-sound');
 const btnReset = document.getElementById('btn-reset');
 const btnSettingsToggle = document.getElementById('btn-settings-toggle');
 const btnAddTen = document.getElementById('btn-add-ten');
@@ -60,6 +62,12 @@ const instabilityThresholdSlider = document.getElementById('instabilityThreshold
 const instabilityThresholdValue = document.getElementById('instabilityThresholdValue');
 const electronLifespanSlider = document.getElementById('electronLifespanSlider');
 const electronLifespanValue = document.getElementById('electronLifespanValue');
+
+// Sound Sliders & Values
+const sfxVolumeSlider = document.getElementById('sfxVolumeSlider');
+const sfxVolumeValue = document.getElementById('sfxVolumeValue');
+const musicVolumeSlider = document.getElementById('musicVolumeSlider');
+const musicVolumeValue = document.getElementById('musicVolumeValue');
 
 // Config Selects
 const chartTimeWindowSelect = document.getElementById('chartTimeWindowSelect');
@@ -204,6 +212,12 @@ function synchronizeConfig() {
     SETTINGS.gpuOptimization = gpuOptimizationSelect.value === 'enabled';
     SETTINGS.enableAttraction = attractionSelect.value === 'enabled';
     
+    // Sound volume syncing
+    SETTINGS.sfxVolume = parseFloat(sfxVolumeSlider.value) / 100;
+    SETTINGS.musicVolume = parseFloat(musicVolumeSlider.value) / 100;
+    soundManager.setSFXVolume(SETTINGS.sfxVolume);
+    soundManager.setMusicVolume(SETTINGS.musicVolume);
+    
     // Toggle body class for GPU optimization (backdrop-filter disable)
     document.body.classList.toggle('gpu-optimized', SETTINGS.gpuOptimization);
     
@@ -275,6 +289,22 @@ function syncDockButtonsFromSettings() {
     btnToggleDiscoveries.setAttribute('aria-pressed', SETTINGS.showDiscoveries ? 'true' : 'false');
     uniqueCombinationsBar.classList.toggle('hidden', !SETTINGS.showDiscoveries);
 
+    // 8. Sound Toggle Button
+    const soundOnIcon = btnToggleSound.querySelector('.icon-volume-on');
+    const soundOffIcon = btnToggleSound.querySelector('.icon-volume-off');
+    
+    btnToggleSound.classList.toggle('active', SETTINGS.soundEnabled);
+    btnToggleSound.classList.toggle('muted', !SETTINGS.soundEnabled);
+    btnToggleSound.setAttribute('aria-pressed', SETTINGS.soundEnabled ? 'true' : 'false');
+    
+    if (SETTINGS.soundEnabled) {
+        soundOnIcon?.classList.remove('hidden');
+        soundOffIcon?.classList.add('hidden');
+    } else {
+        soundOnIcon?.classList.add('hidden');
+        soundOffIcon?.classList.remove('hidden');
+    }
+
     // Refresh bounds since visible components shifted borders
     updateBounds();
 }
@@ -294,6 +324,8 @@ function updateSliderLabels() {
     elasticityValue.textContent = `${(elasticitySlider.value / 10).toFixed(1)}x`;
     instabilityThresholdValue.textContent = (instabilityThresholdSlider.value / 10).toFixed(1);
     electronLifespanValue.textContent = `${(electronLifespanSlider.value / 10).toFixed(1)}x`;
+    sfxVolumeValue.textContent = `${sfxVolumeSlider.value}%`;
+    musicVolumeValue.textContent = `${musicVolumeSlider.value}%`;
 }
 
 /**
@@ -373,6 +405,12 @@ btnToggleDiscoveries.addEventListener('click', () => {
     syncDockButtonsFromSettings();
 });
 
+btnToggleSound.addEventListener('click', () => {
+    const enabled = !soundManager.audioEnabled;
+    soundManager.setAudioEnabled(enabled);
+    syncDockButtonsFromSettings();
+});
+
 btnReset.addEventListener('click', start);
 
 btnSettingsToggle.addEventListener('click', () => {
@@ -410,7 +448,8 @@ attractionSelect.addEventListener('change', () => {
 const allSliders = [
     numMoleculesSlider, simulationAreaSlider, miniParticleScaleSlider,
     lerpFactorSlider, simSpeedSlider, spawnChanceSlider, decayChanceSlider,
-    driftStrengthSlider, elasticitySlider, instabilityThresholdSlider, electronLifespanSlider
+    driftStrengthSlider, elasticitySlider, instabilityThresholdSlider, electronLifespanSlider,
+    sfxVolumeSlider, musicVolumeSlider
 ];
 
 allSliders.forEach(slider => {
@@ -427,6 +466,13 @@ allSliders.forEach(slider => {
         SETTINGS.elasticity = parseFloat(elasticitySlider.value) / 10;
         SETTINGS.instabilityThreshold = parseFloat(instabilityThresholdSlider.value) / 10;
         SETTINGS.electronLifespanMultiplier = parseFloat(electronLifespanSlider.value) / 10;
+        
+        // Dynamic sound volume updating
+        const sfxVol = parseFloat(sfxVolumeSlider.value) / 100;
+        const musicVol = parseFloat(musicVolumeSlider.value) / 100;
+        soundManager.setSFXVolume(sfxVol);
+        soundManager.setMusicVolume(musicVol);
+        
         if (simulation) simulation.needsRedraw = true;
     });
 });

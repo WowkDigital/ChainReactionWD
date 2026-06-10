@@ -2,6 +2,7 @@ import { CONSTANTS, SETTINGS } from '../Config.js';
 import { easeInOut, lerpColorToFull } from '../Utils.js';
 import Entity from './Entity.js';
 import Electron from './Electron.js';
+import { soundManager } from '../SoundManager.js';
 
 export default class Molecule extends Entity {
     /**
@@ -219,6 +220,9 @@ export default class Molecule extends Entity {
         this.markedForRemoval = true;
         
         const { molecules, electrons, registerDiscovery } = context;
+
+        // Play decay sound based on size before split
+        soundManager.playDecay(this.size);
 
         // Smallest size decays fully to raw energy (Electrons)
         if (this.size === 2) {

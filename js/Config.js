@@ -86,6 +86,11 @@ export const SETTINGS = {
     // Chart Time Window
     chartTimeWindow: 30000, // ms
     
+    // Sound & Music Settings
+    soundEnabled: true,
+    sfxVolume: 0.5,
+    musicVolume: 0.3,
+    
     // Execution State
     effectiveTimeScale: 1.0,
     autoTimeScale: 1.0

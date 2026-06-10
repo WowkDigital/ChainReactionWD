@@ -105,6 +105,10 @@
             <button id="btn-toggle-discoveries" class="dock-btn" aria-pressed="false" title="Toggle Discoveries Log">
                 <i data-lucide="history" class="icon"></i>
             </button>
+            <button id="btn-toggle-sound" class="dock-btn active" aria-pressed="true" title="Toggle Audio">
+                <i data-lucide="volume-2" class="icon icon-volume-on"></i>
+                <i data-lucide="volume-x" class="icon icon-volume-off hidden"></i>
+            </button>
             <div class="dock-divider"></div>
             <button id="btn-settings-toggle" class="dock-btn" title="Open Custom Quantities Panel">
                 <i data-lucide="sliders" class="icon"></i>
@@ -201,6 +205,16 @@
             <div class="control-group" title="Electron Energy Lifespan: Controls the survival duration of free high-energy electrons before they decay.">
                 <label for="electronLifespanSlider">Electron Energy Lifespan: <span id="electronLifespanValue" class="slider-val">1.0x</span></label>
                 <input type="range" id="electronLifespanSlider" min="2" max="30" value="10">
+            </div>
+            
+            <div class="control-group" title="SFX Volume: Adjust volume of synthesized sound effects.">
+                <label for="sfxVolumeSlider">SFX Volume: <span id="sfxVolumeValue" class="slider-val">50%</span></label>
+                <input type="range" id="sfxVolumeSlider" min="0" max="100" value="50">
+            </div>
+            
+            <div class="control-group" title="Music Volume: Adjust volume of background music.">
+                <label for="musicVolumeSlider">Music Volume: <span id="musicVolumeValue" class="slider-val">30%</span></label>
+                <input type="range" id="musicVolumeSlider" min="0" max="100" value="30">
             </div>
             
             <hr class="divider">

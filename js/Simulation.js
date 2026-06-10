@@ -6,6 +6,7 @@ import {
     getRandomNormal, 
     calculateAutoTimeScale 
 } from './Utils.js';
+import { soundManager } from './SoundManager.js';
 
 export default class Simulation {
     /**
@@ -83,6 +84,7 @@ export default class Simulation {
             newMolecule.invulnerabilityTimer = CONSTANTS.INVULNERABILITY_DURATION;
             this.molecules.push(newMolecule);
             this.needsRedraw = true;
+            soundManager.playAddParticle();
         } else {
             // Find clicked molecule (searching backward to check top-most rendered first)
             for (let i = this.molecules.length - 1; i >= 0; i--) {
