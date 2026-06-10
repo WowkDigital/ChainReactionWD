@@ -82,6 +82,7 @@ export const SETTINGS = {
     noBoundingBox: false,
     gpuOptimization: true, // GPU power saving (disables backdrop-filter blur)
     enableAttraction: false,
+    cursorAttraction: false,
     
     // Chart Time Window
     chartTimeWindow: 30000, // ms

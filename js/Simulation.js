@@ -209,6 +209,35 @@ export default class Simulation {
     }
 
     /**
+     * Applies attraction towards cursor position if cursor attraction mode is active and pointer is pressed
+     */
+    applyCursorAttraction() {
+        if (!SETTINGS.cursorAttraction || !this.isPointerDown || this.pointerX === undefined) return;
+
+        const px = this.pointerX;
+        const py = this.pointerY;
+        const dt = SETTINGS.effectiveTimeScale;
+        const baseForce = 0.055;
+
+        for (let i = 0; i < this.molecules.length; i++) {
+            const m = this.molecules[i];
+            if (m.markedForRemoval) continue;
+
+            const dx = px - m.x;
+            const dy = py - m.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq > 100) {
+                const dist = Math.sqrt(distSq);
+                const force = baseForce * dt;
+                
+                m.vx += (dx / dist) * force;
+                m.vy += (dy / dist) * force;
+            }
+        }
+    }
+
+    /**
      * Resolves molecular collisions: triggers high-energy combination, or executes elastic bounces
      */
     checkMoleculeCollisions() {
@@ -450,6 +479,7 @@ export default class Simulation {
             this.molecules.sort((a, b) => a.x - b.x);
 
             this.applyMoleculeAttraction();
+            this.applyCursorAttraction();
             this.checkElectronCollisions();
             this.checkMoleculeCollisions();
             this.handleSpontaneousEvents();

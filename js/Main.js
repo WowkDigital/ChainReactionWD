@@ -28,6 +28,7 @@ const btnSettingsToggle = document.getElementById('btn-settings-toggle');
 const btnAddTen = document.getElementById('btn-add-ten');
 const inputAddCount = document.getElementById('input-add-count');
 const btnAttraction = document.getElementById('btn-attraction');
+const btnCursorAttraction = document.getElementById('btn-cursor-attraction');
 
 // Stats Displays
 const simTimeDisplay = document.getElementById('simTimeDisplay');
@@ -279,6 +280,10 @@ function syncDockButtonsFromSettings() {
         attractionSelect.value = SETTINGS.enableAttraction ? 'enabled' : 'disabled';
     }
 
+    // 5c. Cursor Attraction
+    btnCursorAttraction.classList.toggle('active', SETTINGS.cursorAttraction);
+    btnCursorAttraction.setAttribute('aria-pressed', SETTINGS.cursorAttraction ? 'true' : 'false');
+
     // 6. Show Chart
     btnToggleChart.classList.toggle('active', SETTINGS.showChart);
     btnToggleChart.setAttribute('aria-pressed', SETTINGS.showChart ? 'true' : 'false');
@@ -389,6 +394,12 @@ btnScreenWrap.addEventListener('click', () => {
 
 btnAttraction.addEventListener('click', () => {
     SETTINGS.enableAttraction = !SETTINGS.enableAttraction;
+    if (simulation) simulation.needsRedraw = true;
+    syncDockButtonsFromSettings();
+});
+
+btnCursorAttraction.addEventListener('click', () => {
+    SETTINGS.cursorAttraction = !SETTINGS.cursorAttraction;
     if (simulation) simulation.needsRedraw = true;
     syncDockButtonsFromSettings();
 });
@@ -508,6 +519,38 @@ canvas.addEventListener('click', (event) => {
     const y = (event.clientY - rect.top) * (SETTINGS.simulationAreaScale || 1.0);
     simulation.handleCanvasClick(x, y);
 });
+
+// Pointer tracking for cursor attraction gravity
+function updatePointerPosition(event) {
+    if (!simulation) return;
+    const rect = canvas.getBoundingClientRect();
+    simulation.pointerX = (event.clientX - rect.left) * (SETTINGS.simulationAreaScale || 1.0);
+    simulation.pointerY = (event.clientY - rect.top) * (SETTINGS.simulationAreaScale || 1.0);
+}
+
+canvas.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return; // Only primary clicks / touches
+    if (simulation) {
+        simulation.isPointerDown = true;
+        updatePointerPosition(event);
+    }
+});
+
+canvas.addEventListener('pointermove', (event) => {
+    if (simulation && simulation.isPointerDown) {
+        updatePointerPosition(event);
+    }
+});
+
+const clearPointer = () => {
+    if (simulation) {
+        simulation.isPointerDown = false;
+    }
+};
+
+canvas.addEventListener('pointerup', clearPointer);
+canvas.addEventListener('pointercancel', clearPointer);
+canvas.addEventListener('pointerleave', clearPointer);
 
 // Handle resize events
 window.addEventListener('resize', () => {
